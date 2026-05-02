@@ -3,7 +3,7 @@ from __future__ import annotations
 import tomllib
 from pathlib import Path
 
-from graphix_lab import TemplateMetadata, get_template_metadata
+from graphix_lab import TemplateMetadata, get_template_metadata, graphix_info
 from graphix_lab import __name__ as package_module_name
 
 
@@ -22,3 +22,7 @@ def test_public_api_exposes_template_metadata() -> None:
     assert metadata.bootstrap_required is bool(vibe_template_data["bootstrap_required"])
     assert metadata.scope_summary == str(vibe_template_data["project_scope"])
     assert metadata.cli_commands == ("bootstrap", "quality", "test", "clean", "licenses")
+
+
+def test_public_api_exposes_graphix_info() -> None:
+    assert callable(graphix_info)

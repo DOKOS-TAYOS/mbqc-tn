@@ -5,7 +5,7 @@
 The template keeps the public Python API intentionally small.
 
 ```python
-from graphix_lab import TemplateMetadata, get_template_metadata
+from graphix_lab import TemplateMetadata, get_template_metadata, graphix_info
 ```
 
 ### `TemplateMetadata`
@@ -22,6 +22,13 @@ Immutable dataclass describing the current template metadata:
 ### `get_template_metadata()`
 
 Returns the current `TemplateMetadata` snapshot.
+
+### `graphix_info()`
+
+Returns a `GraphixCapabilities` snapshot for the active Graphix runtime.
+
+If Graphix is not installed in the active `.venv`, this function raises a clear
+`GraphixUnavailableError` instead of failing with a raw import error.
 
 ## Public CLI
 
