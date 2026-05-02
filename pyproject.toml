@@ -1,0 +1,84 @@
+[build-system]
+requires = ["hatchling>=1.27.0"]
+build-backend = "hatchling.build"
+
+[project]
+name = "project-name"
+version = "0.0.0"
+description = "PROJECT_SCOPE_PENDING"
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+authors = [{ name = "Alejandro Mata Ali" }]
+keywords = ["python", "template", "vibe-coding", "software"]
+classifiers = [
+    "Development Status :: 2 - Pre-Alpha",
+    "Intended Audience :: Developers",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Typing :: Typed",
+]
+dependencies = []
+
+[project.optional-dependencies]
+dev = [
+    "pip-licenses>=5.0.0",
+    "pyright>=1.1.408",
+    "pytest>=8.4.2",
+    "ruff>=0.11.11",
+]
+
+[project.scripts]
+project-name = "project_name.cli:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/project_name"]
+
+[tool.pytest.ini_options]
+addopts = "-ra --strict-markers"
+pythonpath = ["src"]
+testpaths = ["tests"]
+
+[tool.ruff]
+extend-exclude = [
+    ".tmp",
+    ".venv",
+    ".pytest_cache",
+    "pytest-cache",
+    "pytest-temp",
+    "pytest-cache-files-*",
+    "test-artifacts",
+]
+line-length = 100
+src = ["src", "tests", "examples", "scripts"]
+target-version = "py311"
+
+[tool.ruff.format]
+indent-style = "space"
+line-ending = "lf"
+quote-style = "double"
+
+[tool.ruff.lint]
+select = ["ANN", "ARG", "B", "C4", "E", "F", "I", "N", "RUF", "SIM", "UP"]
+ignore = ["ANN401"]
+
+[tool.pyright]
+include = ["src", "tests", "examples", "scripts"]
+pythonVersion = "3.11"
+typeCheckingMode = "standard"
+venvPath = "."
+venv = ".venv"
+
+[tool.vibe_template]
+project_title = "Project Title Pending"
+distribution_name = "project-name"
+package_name = "project_name"
+author_name = "Alejandro Mata Ali"
+initial_version = "0.0.0"
+project_scope = "PROJECT_SCOPE_PENDING"
+license_id = "MIT"
+bootstrap_required = true
