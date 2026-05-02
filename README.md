@@ -1,51 +1,54 @@
 # Graphix Lab
 
-Stable Python template for software-oriented projects. It starts as a reusable library with a lightweight CLI, strong quality defaults, and a compact handoff path for both people and AI contributors.
+Graphix Lab is a small educational usability layer over Graphix for measurement-based quantum computing experiments. It aims to wrap Graphix circuits and patterns with readable summaries, command introspection, simulation reports, conceptual traces, and Matplotlib/NetworkX visualizations.
 
-## Official First Run
+Graphix Lab does not replace Graphix. It delegates MBQC transpilation, pattern manipulation, flow and gflow logic, and simulation backends to Graphix while this repository focuses on usability, diagnostics, and teaching-friendly APIs.
 
-This template is intentionally incomplete until bootstrap fills in:
+## Intended MVP Flow
 
-- author name
-- initial version
-- project scope
-- license choice
-- final distribution and package names
+The planned user-facing workflow for the MVP looks like this:
+
+```python
+from graphix_lab import circuit
+
+lab = (
+    circuit(2)
+    .h(0)
+    .cnot(0, 1)
+    .compile()
+    .standardize()
+    .shift_signals()
+)
+
+print(lab.summary())
+fig = lab.draw()
+report = lab.run(backend="statevector", seed=123, trace=True)
+```
+
+## Working In This Repository
+
+This repository has already been bootstrapped as Graphix Lab. Do not rerun `bootstrap` here.
 
 1. Create and activate `.venv`.
 2. Install in editable mode with dev tools: `python -m pip install -e .[dev]`
-3. Run `bin\bootstrap.cmd` on Windows or `./bin/bootstrap.sh` on Linux/macOS.
-4. Let bootstrap finish its automatic editable reinstall.
-5. Run `bin\quality.cmd` on Windows or `./bin/quality.sh` on Linux/macOS.
+3. Run `bin\quality.cmd` on Windows or `./bin/quality.sh` on Linux/macOS.
+4. After installing or changing runtime dependencies, regenerate `THIRD_PARTY_LICENSES` with `python scripts/run_template_command.py licenses`.
 
-Bootstrap is a one-time step for a fresh copy of the template. After it finishes, treat the repository as the real project codebase and keep using the stable wrappers when you want the safest entrypoint.
-
-This template repository itself is published under MIT. Bootstrap can keep that choice or replace it for the project you create from the template.
-
-## Why the Wrappers Stay Useful
-
-Before bootstrap, the placeholder package is still called `graphix_lab`. After bootstrap, the package name changes. The wrappers in `bin/` stay stable across that rename and prefer the local `.venv` interpreter when it exists.
-
-If you want the raw module entrypoint, use `python -m graphix_lab.cli ...` before bootstrap and the new package name after bootstrap.
+The wrappers in `bin/` stay useful because they prefer the local `.venv` interpreter and keep the quality flow consistent across Windows and Linux/macOS.
 
 ## Project Scope
 
 `A small, educational usability layer over Graphix for measurement-based quantum computing experiments. The project wraps Graphix patterns and circuits with clearer summaries, command introspection, simulation reports, Matplotlib/NetworkX visualizations, step traces, and optional Qiskit import helpers without reimplementing Graphix core backends.`
 
-## What This Template Includes
-
-- `src` layout with a small public API and a CLI entrypoint
-- TDD-oriented tests for API, bootstrap, cleanup, CLI, and examples
-- stable wrappers for bootstrap, quality, and clean
-- documentation for humans plus a short AI fast path
-- CI for Windows and Ubuntu with Python 3.11 to 3.13, plus a fresh-copy bootstrap smoke run
-
-## More Docs
+## Project Documentation
 
 - [Documentation index](docs/README.md)
+- [Graphix Lab project docs](docs/graphix_lab/README.md)
 - [Quick start](docs/quick-start.md)
 - [Developer guide](docs/guide.md)
 - [Architecture](docs/architecture.md)
 - [API overview](docs/api.md)
 - [AI user guide](docs/docs_for_ai/guide_for_ai_users.md)
 - [AI project instructions](docs/docs_for_ai/project_ai_instructions.md)
+- [AI status board](docs/docs_for_ai/status.md)
+- [Graphix Lab AI addendum](docs/docs_for_ai/graphix_lab_status_addendum.md)

@@ -1,13 +1,15 @@
 # Changelog
 
-All notable changes to this template are documented in this file.
+All notable changes to this project are documented in this file.
 
 ## Unreleased
 
 ### Added
 
+- Graphix Lab planning documents under `docs/graphix_lab/`, covering scope, architecture, public API, Graphix integration, visualization, Qiskit, testing, packaging, roadmap, and template integration.
+- `docs/docs_for_ai/graphix_lab_status_addendum.md` so future handoffs keep Graphix-specific phase, blocker, and quality context next to the main AI status board.
 - Python software template with `src` layout, CLI entrypoint, and bootstrap flow.
-- Cleanup, quality, test, and license commands with Windows/Linux wrappers.
+- Cleanup and quality wrappers plus test and license CLI commands.
 - Human documentation, AI documentation, examples, and CI defaults.
 - TDD-oriented tests for bootstrap, cleanup, CLI, public API, and examples.
 - A reusable `scripts/bootstrap_smoke.py` helper that creates a fresh template copy, bootstraps it non-interactively, and runs the full quality flow.
@@ -32,6 +34,9 @@ All notable changes to this template are documented in this file.
 
 ### Changed
 
+- The root README and documentation index now frame the repository as Graphix Lab and point readers to the new project-specific planning docs instead of template-only guidance.
+- Runtime dependency metadata now declares Graphix, Matplotlib, NetworkX, and NumPy as core dependencies, plus optional `qiskit` and `examples` extras, while preserving the existing `dev` tooling set.
+- Release and AI status docs now note that `THIRD_PARTY_LICENSES` must be regenerated after the new runtime dependencies are installed in `.venv`.
 - The project identity now uses the Graphix Lab bootstrap values: title `Graphix Lab`, distribution `graphix-lab`, package `graphix_lab`, version `0.1.0`, and the Graphix usability-layer project scope.
 - The template footprint is leaner by default: removed `CITATION.cff`, removed `docs/features.md`, and reduced `bin/` wrappers to bootstrap, quality, and clean.
 - The recommended first-run flow now uses stable wrappers in `bin/`, which keep working across the bootstrap package rename and prefer the local `.venv`.

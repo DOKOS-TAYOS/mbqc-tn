@@ -35,13 +35,14 @@ def test_wrappers_prefer_local_virtual_environment() -> None:
     assert ".venv/bin/python" in bootstrap_sh
 
 
-def test_ai_docs_directory_contains_only_three_files() -> None:
+def test_ai_docs_directory_contains_project_status_addendum() -> None:
     repo_root = Path(__file__).resolve().parents[2]
     ai_doc_names = sorted(
         path.name for path in (repo_root / "docs" / "docs_for_ai").iterdir() if path.is_file()
     )
 
     assert ai_doc_names == [
+        "graphix_lab_status_addendum.md",
         "guide_for_ai_users.md",
         "project_ai_instructions.md",
         "status.md",

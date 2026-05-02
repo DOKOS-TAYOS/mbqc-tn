@@ -22,9 +22,16 @@ classifiers = [
     "Programming Language :: Python :: 3.13",
     "Typing :: Typed",
 ]
-dependencies = []
+dependencies = [
+    "graphix>=0.3.5,<0.4",
+    "matplotlib>=3.8",
+    "networkx>=3.2",
+    "numpy>=1.26",
+]
 
 [project.optional-dependencies]
+qiskit = ["qiskit>=2,<3"]
+examples = ["jupyter>=1.1"]
 dev = [
     "pip-licenses>=5.0.0",
     "pyright>=1.1.408",
