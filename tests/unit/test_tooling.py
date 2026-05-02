@@ -3,7 +3,7 @@ from __future__ import annotations
 import sys
 from pathlib import Path
 
-from project_name.app.tooling_service import (
+from graphix_lab.app.tooling_service import (
     build_bootstrap_resync_command,
     build_license_command,
     build_quality_commands,
@@ -25,7 +25,7 @@ def test_quality_commands_cover_lint_format_test_and_typecheck() -> None:
 def test_license_command_generates_compact_inventory() -> None:
     command = build_license_command(
         output_file=Path("THIRD_PARTY_LICENSES"),
-        distribution_name="project-name",
+        distribution_name="graphix-lab",
     )
 
     assert command == [
@@ -37,7 +37,7 @@ def test_license_command_generates_compact_inventory() -> None:
         "--format=markdown",
         "--with-urls",
         "--ignore-packages",
-        "project-name",
+        "graphix-lab",
         "--output-file",
         "THIRD_PARTY_LICENSES",
     ]

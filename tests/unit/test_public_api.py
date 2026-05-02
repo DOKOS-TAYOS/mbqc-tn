@@ -3,8 +3,8 @@ from __future__ import annotations
 import tomllib
 from pathlib import Path
 
-from project_name import TemplateMetadata, get_template_metadata
-from project_name import __name__ as package_module_name
+from graphix_lab import TemplateMetadata, get_template_metadata
+from graphix_lab import __name__ as package_module_name
 
 
 def test_public_api_exposes_template_metadata() -> None:

@@ -19,7 +19,7 @@ def _cli_env() -> dict[str, str]:
 
 def test_cli_clean_dry_run_command_runs_successfully() -> None:
     completed_process = subprocess.run(
-        [sys.executable, "-m", "project_name.cli", "clean", "--dry-run"],
+        [sys.executable, "-m", "graphix_lab.cli", "clean", "--dry-run"],
         check=False,
         capture_output=True,
         text=True,
@@ -32,7 +32,7 @@ def test_cli_clean_dry_run_command_runs_successfully() -> None:
 
 def test_cli_help_lists_expected_commands() -> None:
     completed_process = subprocess.run(
-        [sys.executable, "-m", "project_name.cli", "--help"],
+        [sys.executable, "-m", "graphix_lab.cli", "--help"],
         check=False,
         capture_output=True,
         text=True,

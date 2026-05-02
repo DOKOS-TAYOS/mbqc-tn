@@ -85,7 +85,7 @@ def _handle_bootstrap(args: argparse.Namespace) -> int:
     if not bootstrap_required_for_workspace(project_root):
         print(BOOTSTRAP_ALREADY_COMPLETED_MESSAGE)
         return 1
-    distribution_name = args.distribution_name or _prompt("Distribution name", "project-name")
+    distribution_name = args.distribution_name or _prompt("Distribution name", "graphix-lab")
     if args.package_name:
         package_name = args.package_name
     elif args.distribution_name:
@@ -96,7 +96,7 @@ def _handle_bootstrap(args: argparse.Namespace) -> int:
             derive_package_name(distribution_name),
         )
     answers = BootstrapAnswers(
-        project_title=args.project_title or _prompt("Project title", "Project Title Pending"),
+        project_title=args.project_title or _prompt("Project title", "Graphix Lab"),
         distribution_name=distribution_name,
         package_name=package_name,
         author_name=args.author_name or _prompt("Author name"),

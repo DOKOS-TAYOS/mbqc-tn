@@ -3,9 +3,9 @@ requires = ["hatchling>=1.27.0"]
 build-backend = "hatchling.build"
 
 [project]
-name = "project-name"
-version = "0.0.0"
-description = "PROJECT_SCOPE_PENDING"
+name = "graphix-lab"
+version = "0.1.0"
+description = "A small, educational usability layer over Graphix for measurement-based quantum computing experiments. The project wraps Graphix patterns and circuits with clearer summaries, command introspection, simulation reports, Matplotlib/NetworkX visualizations, step traces, and optional Qiskit import helpers without reimplementing Graphix core backends."
 readme = "README.md"
 requires-python = ">=3.11"
 license = { text = "MIT" }
@@ -33,10 +33,10 @@ dev = [
 ]
 
 [project.scripts]
-project-name = "project_name.cli:main"
+graphix-lab = "graphix_lab.cli:main"
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/project_name"]
+packages = ["src/graphix_lab"]
 
 [tool.pytest.ini_options]
 addopts = "-ra --strict-markers"
@@ -74,11 +74,11 @@ venvPath = "."
 venv = ".venv"
 
 [tool.vibe_template]
-project_title = "Project Title Pending"
-distribution_name = "project-name"
-package_name = "project_name"
+project_title = "Graphix Lab"
+distribution_name = "graphix-lab"
+package_name = "graphix_lab"
 author_name = "Alejandro Mata Ali"
-initial_version = "0.0.0"
-project_scope = "PROJECT_SCOPE_PENDING"
+initial_version = "0.1.0"
+project_scope = "A small, educational usability layer over Graphix for measurement-based quantum computing experiments. The project wraps Graphix patterns and circuits with clearer summaries, command introspection, simulation reports, Matplotlib/NetworkX visualizations, step traces, and optional Qiskit import helpers without reimplementing Graphix core backends."
 license_id = "MIT"
-bootstrap_required = true
+bootstrap_required = false

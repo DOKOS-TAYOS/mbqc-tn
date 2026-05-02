@@ -5,7 +5,7 @@
 The template keeps the public Python API intentionally small.
 
 ```python
-from project_name import TemplateMetadata, get_template_metadata
+from graphix_lab import TemplateMetadata, get_template_metadata
 ```
 
 ### `TemplateMetadata`
@@ -39,6 +39,6 @@ Returns the current `TemplateMetadata` snapshot.
 - `clean` removes caches and temporary artifacts, but stays conservative around `.venv`, `.git`, and inaccessible subtrees.
 - `licenses` regenerates `THIRD_PARTY_LICENSES` from the active interpreter and excludes the local template package.
 
-During template stage, `project_name` is still a placeholder package name. After bootstrap, the module path changes. The `bin/` wrappers are the stable user-facing entrypoints across that rename.
+During template stage, `graphix_lab` is still a placeholder package name. After bootstrap, the module path changes. The `bin/` wrappers are the stable user-facing entrypoints across that rename.
 
-Treat everything outside `src/project_name/__init__.py` and the CLI subcommands as internal implementation detail.
+Treat everything outside `src/graphix_lab/__init__.py` and the CLI subcommands as internal implementation detail.

@@ -21,7 +21,7 @@ def select_python_executable(project_root: Path) -> Path:
 def load_package_name(project_root: Path) -> str:
     pyproject_path = project_root / "pyproject.toml"
     if not pyproject_path.exists():
-        return "project_name"
+        return "graphix_lab"
 
     pyproject_data = tomllib.loads(pyproject_path.read_text(encoding="utf-8"))
     tool_data = pyproject_data.get("tool", {})
@@ -29,7 +29,7 @@ def load_package_name(project_root: Path) -> str:
     package_name = template_data.get("package_name")
     if isinstance(package_name, str) and package_name.strip():
         return package_name
-    return "project_name"
+    return "graphix_lab"
 
 
 def build_command(project_root: Path, args: Sequence[str]) -> list[str]:

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import re
 import shutil
 import tomllib
 from pathlib import Path
@@ -8,8 +9,8 @@ from subprocess import CompletedProcess
 
 import pytest
 
-import project_name.cli as cli_module
-from project_name.app.bootstrap_service import (
+import graphix_lab.cli as cli_module
+from graphix_lab.app.bootstrap_service import (
     SKIP_DIRECTORIES,
     TEXT_FILE_NAMES,
     TEXT_FILE_SUFFIXES,
@@ -18,7 +19,7 @@ from project_name.app.bootstrap_service import (
     PlannedChange,
     bootstrap_template,
 )
-from project_name.infrastructure.text_files import iter_text_files
+from graphix_lab.infrastructure.text_files import iter_text_files
 
 
 def _template_project_title() -> str:
@@ -57,6 +58,16 @@ def _bootstrap_required_assignment(value: bool) -> str:
 def _bootstrap_required_metadata_value(value: bool) -> str:
     bool_value = "True" if value else "False"
     return f"bootstrap_required={bool_value}"
+
+
+def _restore_template_metadata_scope_summary(content: str) -> str:
+    pattern = re.compile(r"(?ms)^(?P<indent>\s*)scope_summary=.*?^(?P=indent)cli_commands=")
+
+    def replace(match: re.Match[str]) -> str:
+        indent = match.group("indent")
+        return f'{indent}scope_summary="{_template_project_scope()}",\n{indent}cli_commands='
+
+    return pattern.sub(replace, content, count=1)
 
 
 def _copy_template_workspace(source_root: Path, workspace: Path) -> None:
@@ -103,10 +114,14 @@ def _restore_public_template_state(workspace: Path) -> None:
         file_names=TEXT_FILE_NAMES,
         skip_directories=SKIP_DIRECTORIES,
     ):
+        if path.name == "THIRD_PARTY_LICENSES":
+            continue
         original_content = path.read_text(encoding="utf-8")
         updated_content = original_content
         for old_value, new_value in text_replacements:
             updated_content = updated_content.replace(old_value, new_value)
+        if path.as_posix().endswith("domain/template_metadata.py"):
+            updated_content = _restore_template_metadata_scope_summary(updated_content)
         if path.name == "pyproject.toml":
             updated_content = updated_content.replace(
                 f'license = {{ text = "{current_state["license_id"]}" }}',
@@ -290,6 +305,37 @@ def test_bootstrap_template_keeps_third_party_license_inventory_stable_for_publi
     assert updated_third_party_licenses == original_third_party_licenses
 
 
+def test_bootstrap_template_wraps_long_scope_summary_in_generated_metadata(
+    temp_dir: Path,
+) -> None:
+    source_root = Path(__file__).resolve().parents[2]
+    workspace = temp_dir / "workspace"
+    _copy_template_workspace(source_root, workspace)
+    long_scope = (
+        "This bootstrap scope is intentionally long so the generated template metadata keeps "
+        "a readable Python layout while still preserving the exact project description text."
+    )
+
+    answers = BootstrapAnswers(
+        project_title="Wrapped Scope Project",
+        distribution_name="wrapped-scope-project",
+        package_name="wrapped_scope_project",
+        author_name="Lynn Conway",
+        initial_version="0.6.0",
+        project_scope=long_scope,
+        license_id="MIT",
+    )
+
+    bootstrap_template(workspace_root=workspace, answers=answers, dry_run=False)
+
+    template_metadata_content = (
+        workspace / "src" / "wrapped_scope_project" / "domain" / "template_metadata.py"
+    ).read_text(encoding="utf-8")
+
+    assert "scope_summary=(" in template_metadata_content
+    assert max(len(line) for line in template_metadata_content.splitlines()) <= 100
+
+
 def test_bootstrap_cli_reinstalls_for_the_new_package_name(
     temp_dir: Path,
     monkeypatch: pytest.MonkeyPatch,
@@ -300,7 +346,7 @@ def test_bootstrap_cli_reinstalls_for_the_new_package_name(
     _write_bootstrap_required_pyproject(workspace, True)
     planned_change = PlannedChange(
         path=workspace / "src" / "bootstrap_cli_project",
-        description="Rename package directory from project_name to bootstrap_cli_project",
+        description="Rename package directory from graphix_lab to bootstrap_cli_project",
     )
 
     def fake_bootstrap_template(

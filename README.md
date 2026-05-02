@@ -1,4 +1,4 @@
-# Project Title Pending
+# Graphix Lab
 
 Stable Python template for software-oriented projects. It starts as a reusable library with a lightweight CLI, strong quality defaults, and a compact handoff path for both people and AI contributors.
 
@@ -24,13 +24,13 @@ This template repository itself is published under MIT. Bootstrap can keep that 
 
 ## Why the Wrappers Stay Useful
 
-Before bootstrap, the placeholder package is still called `project_name`. After bootstrap, the package name changes. The wrappers in `bin/` stay stable across that rename and prefer the local `.venv` interpreter when it exists.
+Before bootstrap, the placeholder package is still called `graphix_lab`. After bootstrap, the package name changes. The wrappers in `bin/` stay stable across that rename and prefer the local `.venv` interpreter when it exists.
 
-If you want the raw module entrypoint, use `python -m project_name.cli ...` before bootstrap and the new package name after bootstrap.
+If you want the raw module entrypoint, use `python -m graphix_lab.cli ...` before bootstrap and the new package name after bootstrap.
 
 ## Project Scope
 
-`PROJECT_SCOPE_PENDING`
+`A small, educational usability layer over Graphix for measurement-based quantum computing experiments. The project wraps Graphix patterns and circuits with clearer summaries, command introspection, simulation reports, Matplotlib/NetworkX visualizations, step traces, and optional Qiskit import helpers without reimplementing Graphix core backends.`
 
 ## What This Template Includes
 

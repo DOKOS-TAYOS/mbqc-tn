@@ -17,7 +17,7 @@ def main() -> None:
         else os.pathsep.join([str(src_dir), existing_python_path])
     )
     completed_process = subprocess.run(
-        [sys.executable, "-m", "project_name.cli", "clean", "--dry-run"],
+        [sys.executable, "-m", "graphix_lab.cli", "clean", "--dry-run"],
         check=True,
         capture_output=True,
         text=True,

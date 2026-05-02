@@ -25,7 +25,7 @@ The template starts with placeholder metadata and a placeholder package name. Bo
 
 1. validates user answers
 2. rewrites tracked text files
-3. renames `src/project_name`
+3. renames `src/graphix_lab`
 4. writes the chosen project license
 
 Relative imports inside the package reduce the amount of fragile rename logic.

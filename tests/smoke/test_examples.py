@@ -5,7 +5,7 @@ import subprocess
 import sys
 from pathlib import Path
 
-from project_name import get_template_metadata
+from graphix_lab import get_template_metadata
 
 
 def _example_env() -> dict[str, str]:

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import keyword
 import re
 import tomllib
@@ -250,6 +251,9 @@ def _updated_text_content(
     state: TemplateState,
     answers: BootstrapAnswers,
 ) -> str:
+    if path.name == "THIRD_PARTY_LICENSES":
+        return content
+
     updated_content = _replace_text(content, replacements)
     if path.name == "pyproject.toml":
         updated_content = _replace_text(
@@ -273,6 +277,11 @@ def _updated_text_content(
                 ),
             ],
         )
+    if path.as_posix().endswith("domain/template_metadata.py"):
+        updated_content = _replace_template_metadata_scope_summary(
+            updated_content,
+            answers.project_scope,
+        )
     if path.as_posix().endswith("docs/docs_for_ai/status.md"):
         updated_content = _replace_text(
             updated_content,
@@ -294,6 +303,52 @@ def _apply_text_replacements(
         )
         if updated_content != original_content:
             path.write_text(updated_content, encoding="utf-8")
+
+
+def _replace_template_metadata_scope_summary(content: str, scope_summary: str) -> str:
+    pattern = re.compile(r"(?ms)^(?P<indent>\s*)scope_summary=.*?^(?P=indent)cli_commands=")
+
+    def replace(match: re.Match[str]) -> str:
+        indent = match.group("indent")
+        formatted_scope_summary = _format_scope_summary_assignment(scope_summary, indent)
+        return f"{formatted_scope_summary}\n{indent}cli_commands="
+
+    return pattern.sub(replace, content, count=1)
+
+
+def _format_scope_summary_assignment(scope_summary: str, indent: str) -> str:
+    quoted_scope_summary = json.dumps(scope_summary)
+    single_line_assignment = f"{indent}scope_summary={quoted_scope_summary},"
+    if len(single_line_assignment) <= 100:
+        return single_line_assignment
+
+    continuation_indent = f"{indent}    "
+    wrapped_scope_parts = _wrap_prose_text(
+        scope_summary,
+        max_width=100 - len(continuation_indent) - 2,
+    )
+    wrapped_scope_literal = "\n".join(
+        f"{continuation_indent}{json.dumps(scope_part)}" for scope_part in wrapped_scope_parts
+    )
+    return f"{indent}scope_summary=(\n{wrapped_scope_literal}\n{indent}),"
+
+
+def _wrap_prose_text(text: str, max_width: int) -> list[str]:
+    words = text.split(" ")
+    wrapped_lines: list[str] = []
+    current_line = ""
+
+    for word in words:
+        candidate = word if not current_line else f"{current_line} {word}"
+        if len(candidate) <= max_width or not current_line:
+            current_line = candidate
+            continue
+        wrapped_lines.append(f"{current_line} ")
+        current_line = word
+
+    if current_line or not wrapped_lines:
+        wrapped_lines.append(current_line)
+    return wrapped_lines
 
 
 def _collect_package_rename_changes(

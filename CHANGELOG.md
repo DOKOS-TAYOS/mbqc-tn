@@ -11,9 +11,12 @@ All notable changes to this template are documented in this file.
 - Human documentation, AI documentation, examples, and CI defaults.
 - TDD-oriented tests for bootstrap, cleanup, CLI, public API, and examples.
 - A reusable `scripts/bootstrap_smoke.py` helper that creates a fresh template copy, bootstraps it non-interactively, and runs the full quality flow.
+- The copied repository is now bootstrapped as Graphix Lab with a local `.venv` dev environment and regenerated `THIRD_PARTY_LICENSES`.
 
 ### Fixed
 
+- Bootstrap now wraps long generated `scope_summary` values in `template_metadata.py`, which keeps post-bootstrap Ruff runs green for verbose project descriptions.
+- Bootstrap no longer rewrites `THIRD_PARTY_LICENSES` as plain text during identity replacement; the inventory now changes only when the explicit license-generation step runs.
 - `THIRD_PARTY_LICENSES` generation now stays compact and uses the active project interpreter instead of expanding full license texts or scanning unrelated global packages.
 - Bootstrap now re-syncs the editable install after renaming the package, so the new project state is immediately usable.
 - Bootstrap now refuses to run again once the template has already been configured, including dry-run calls.
@@ -29,6 +32,7 @@ All notable changes to this template are documented in this file.
 
 ### Changed
 
+- The project identity now uses the Graphix Lab bootstrap values: title `Graphix Lab`, distribution `graphix-lab`, package `graphix_lab`, version `0.1.0`, and the Graphix usability-layer project scope.
 - The template footprint is leaner by default: removed `CITATION.cff`, removed `docs/features.md`, and reduced `bin/` wrappers to bootstrap, quality, and clean.
 - The recommended first-run flow now uses stable wrappers in `bin/`, which keep working across the bootstrap package rename and prefer the local `.venv`.
 - The public CLI now focuses on `bootstrap`, `quality`, `test`, `clean`, and `licenses`; the old `demo` command was removed in favor of real examples built on safe commands.

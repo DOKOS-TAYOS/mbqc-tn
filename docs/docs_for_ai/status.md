@@ -1,9 +1,9 @@
 # Status
 
-- Phase: Template hardened for Windows-first bootstrap and maintenance
-- Last update: test isolation, cleanup walking, bootstrap guardrails, wrapper/runtime behavior, fresh-copy CI smoke coverage, and public-template licensing were tightened
-- Next step: Create a project from the template and run bootstrap once
-- Blockers: None in template state
+- Phase: Graphix Lab bootstrapped from vibe_template and ready for project-specific implementation
+- Last update: one-time bootstrap completed, the package was renamed to `graphix_lab`, the editable dev environment was installed in `.venv`, `THIRD_PARTY_LICENSES` was regenerated from the local interpreter, and the bootstrap flow was hardened for long scope summaries plus stable license inventory handling
+- Next step: Continue with `graphix_lab_vibe_template_codex_pack/prompts/01_project_docs_and_dependencies.md`
+- Blockers: None
 - License: MIT
 
 ## Checklist
@@ -18,5 +18,5 @@
 - [x] Minimal stable wrappers exist
 - [x] Cleanup command protects `.venv`
 - [x] Cleanup tolerates inaccessible subtrees conservatively
-- [ ] Project-specific bootstrap completed
-- [ ] Third-party license inventory regenerated after dependency install
+- [x] Project-specific bootstrap completed
+- [x] Third-party license inventory regenerated after dependency install

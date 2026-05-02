@@ -6,7 +6,7 @@ from pathlib import Path
 
 import pytest
 
-from project_name.app.clean_service import collect_cleanup_paths, run_clean
+from graphix_lab.app.clean_service import collect_cleanup_paths, run_clean
 
 
 def test_collect_cleanup_paths_ignores_virtual_environment(temp_dir: Path) -> None:
@@ -25,7 +25,7 @@ def test_collect_cleanup_paths_ignores_virtual_environment(temp_dir: Path) -> No
 
 
 def test_collect_cleanup_paths_removes_nested_python_caches(temp_dir: Path) -> None:
-    pycache_dir = temp_dir / "src" / "project_name" / "__pycache__"
+    pycache_dir = temp_dir / "src" / "graphix_lab" / "__pycache__"
     pycache_dir.mkdir(parents=True)
 
     cleanup_paths = collect_cleanup_paths(temp_dir)
@@ -90,7 +90,7 @@ def test_run_clean_reports_permission_errors_and_continues(
         del ignore_errors
         raise PermissionError(f"blocked: {path}")
 
-    monkeypatch.setattr("project_name.app.clean_service.shutil.rmtree", failing_rmtree)
+    monkeypatch.setattr("graphix_lab.app.clean_service.shutil.rmtree", failing_rmtree)
 
     result = run_clean(temp_dir)
 
