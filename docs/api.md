@@ -83,6 +83,7 @@ Available live pattern methods in this prompt:
 - `.standardize()`
 - `.shift_signals()`
 - `.perform_pauli_measurements()`
+- `.commands()`
 
 Mutation semantics are explicit:
 
@@ -100,6 +101,27 @@ Mutation semantics are explicit:
 If an installed Graphix version does not expose one of the required pattern
 methods, Graphix Lab raises `GraphixCompatibilityError` instead of failing with
 an unhelpful attribute error.
+
+`commands()` iterates over the wrapped Graphix pattern and normalizes each
+command into a stable `CommandRecord` with:
+
+- `index`
+- `kind`
+- `node`
+- `nodes`
+- `angle`
+- `plane`
+- `s_domain`
+- `t_domain`
+- `domain`
+- `raw`
+
+The adapter currently recognizes `N`, `E`, `M`, `X`, `Z`, and `C` commands.
+For measurement commands, Graphix Lab reads angle and plane information
+defensively from either direct command attributes or nested measurement objects.
+If Graphix exposes an unrecognized command object, Graphix Lab still returns a
+record with `kind="UNKNOWN"` and the raw `repr` so callers can inspect it
+without crashing.
 
 ### `from_qiskit(qc: object, *, angle_units: str = "radians") -> LabCircuit`
 

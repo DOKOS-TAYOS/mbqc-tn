@@ -14,7 +14,7 @@ from .domain.commands import CommandRecord
 from .domain.simulation import BackendComparisonReport, SimulationReport
 from .domain.summaries import PatternSummary, ResourceSummary
 from .domain.traces import RunTrace
-from .infrastructure.graphix_adapter import GraphixCircuitProtocol
+from .infrastructure.graphix_adapter import GraphixCircuitProtocol, extract_command_records
 
 _PROMPT_NOT_READY_MESSAGE = (
     "{name} is part of the public Graphix Lab API surface, but its Graphix-backed "
@@ -122,7 +122,7 @@ class LabPattern:
         return self._apply_graphix_pattern_method("perform_pauli_measurements")
 
     def commands(self) -> tuple[CommandRecord, ...]:
-        raise NotImplementedError(_PROMPT_NOT_READY_MESSAGE.format(name="LabPattern.commands"))
+        return extract_command_records(self.pattern)
 
     def summary(self) -> PatternSummary:
         raise NotImplementedError(_PROMPT_NOT_READY_MESSAGE.format(name="LabPattern.summary"))

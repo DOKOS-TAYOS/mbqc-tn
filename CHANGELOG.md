@@ -6,6 +6,7 @@ All notable changes to this project are documented in this file.
 
 ### Added
 
+- `LabPattern.commands()` now returns stable `CommandRecord` tuples by normalizing Graphix pattern commands through a defensive adapter that supports the known `N`, `E`, `M`, `X`, `Z`, and `C` command kinds, preserves raw `repr` output, and falls back to `kind="UNKNOWN"` for unrecognized command objects.
 - A Graphix-backed `LabPattern` wrapper that keeps a live Graphix pattern reference, supports fluent `standardize()`, `shift_signals()`, and `perform_pauli_measurements()` mutation helpers, exposes `copy()` when the runtime provides `Pattern.copy()`, and raises clear `GraphixCompatibilityError` messages when a pattern API is missing.
 - Focused unit coverage for the live `LabPattern` wrapper, including compile-to-pattern flow, method chaining, copy semantics, and compatibility failures against a fake Graphix runtime.
 - A Graphix-backed `LabCircuit` fluent wrapper that chains `h`, `x`, `y`, `z`, `s`, `rx`, `ry`, `rz`, and `cnot`, exposes `to_graphix()`, and compiles through `circuit.transpile().pattern` into `LabPattern`.
@@ -42,6 +43,7 @@ All notable changes to this project are documented in this file.
 
 ### Changed
 
+- `docs/api.md` now documents the live `LabPattern.commands()` behavior, including how command kinds, measurement metadata, correction domains, and unknown-command fallbacks are exposed through `CommandRecord`.
 - `docs/api.md` now documents the live `LabPattern` wrapper semantics, including in-place mutation behavior, fluent chaining, and runtime-dependent `copy()` support.
 - `docs/api.md` now documents the live `LabCircuit` wrapper behavior instead of describing the circuit entrypoint as a future stub.
 - The placeholder `TemplateMetadata` top-level API has been retired in favor of the Graphix Lab public surface, and `docs/api.md` plus `examples/library_usage.py` now reflect the new domain-model-first contract.
