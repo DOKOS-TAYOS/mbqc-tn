@@ -6,6 +6,7 @@ All notable changes to this project are documented in this file.
 
 ### Added
 
+- A defensive Graphix capability adapter with typed domain errors, a frozen `GraphixCapabilities` dataclass, and a public `graphix_info()` entrypoint for inspecting the active Graphix runtime.
 - Graphix Lab planning documents under `docs/graphix_lab/`, covering scope, architecture, public API, Graphix integration, visualization, Qiskit, testing, packaging, roadmap, and template integration.
 - `docs/docs_for_ai/graphix_lab_status_addendum.md` so future handoffs keep Graphix-specific phase, blocker, and quality context next to the main AI status board.
 - Python software template with `src` layout, CLI entrypoint, and bootstrap flow.
@@ -14,6 +15,7 @@ All notable changes to this project are documented in this file.
 - TDD-oriented tests for bootstrap, cleanup, CLI, public API, and examples.
 - A reusable `scripts/bootstrap_smoke.py` helper that creates a fresh template copy, bootstraps it non-interactively, and runs the full quality flow.
 - The copied repository is now bootstrapped as Graphix Lab with a local `.venv` dev environment and regenerated `THIRD_PARTY_LICENSES`.
+- Targeted unit tests now cover Graphix capability discovery with a monkeypatched installed runtime and the clear error path when Graphix is missing.
 
 ### Fixed
 
@@ -34,6 +36,7 @@ All notable changes to this project are documented in this file.
 
 ### Changed
 
+- The public API docs and regression tests now include the new `graphix_info()` runtime inspection entrypoint.
 - The root README and documentation index now frame the repository as Graphix Lab and point readers to the new project-specific planning docs instead of template-only guidance.
 - Runtime dependency metadata now declares Graphix, Matplotlib, NetworkX, and NumPy as core dependencies, plus optional `qiskit` and `examples` extras, while preserving the existing `dev` tooling set.
 - Release and AI status docs now note that `THIRD_PARTY_LICENSES` must be regenerated after the new runtime dependencies are installed in `.venv`.
