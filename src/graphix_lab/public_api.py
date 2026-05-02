@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+from typing import NoReturn
 
 from .app.circuit_service import (
     apply_cnot_gate,
@@ -16,7 +17,7 @@ from .domain.summaries import PatternSummary, ResourceSummary
 from .domain.traces import RunTrace
 from .infrastructure.graphix_adapter import GraphixCircuitProtocol, extract_command_records
 
-_PROMPT_NOT_READY_MESSAGE = (
+_UNIMPLEMENTED_PUBLIC_API_MESSAGE = (
     "{name} is part of the public Graphix Lab API surface, but its Graphix-backed "
     "behavior is not implemented yet in this checkout."
 )
@@ -32,7 +33,7 @@ def from_graphix_pattern(pattern: object) -> LabPattern:
 
 def from_qiskit(qc: object, *, angle_units: str = "radians") -> LabCircuit:
     del qc, angle_units
-    raise NotImplementedError(_PROMPT_NOT_READY_MESSAGE.format(name="from_qiskit"))
+    _raise_not_ready_public_api("from_qiskit")
 
 
 @dataclass(frozen=True, slots=True)
@@ -125,13 +126,13 @@ class LabPattern:
         return extract_command_records(self.pattern)
 
     def summary(self) -> PatternSummary:
-        raise NotImplementedError(_PROMPT_NOT_READY_MESSAGE.format(name="LabPattern.summary"))
+        _raise_not_ready_public_api("LabPattern.summary")
 
     def explain(self) -> str:
-        raise NotImplementedError(_PROMPT_NOT_READY_MESSAGE.format(name="LabPattern.explain"))
+        _raise_not_ready_public_api("LabPattern.explain")
 
     def resources(self) -> ResourceSummary:
-        raise NotImplementedError(_PROMPT_NOT_READY_MESSAGE.format(name="LabPattern.resources"))
+        _raise_not_ready_public_api("LabPattern.resources")
 
     def run(
         self,
@@ -141,23 +142,25 @@ class LabPattern:
         trace: bool = False,
     ) -> SimulationReport:
         del backend, seed, trace
-        raise NotImplementedError(_PROMPT_NOT_READY_MESSAGE.format(name="LabPattern.run"))
+        _raise_not_ready_public_api("LabPattern.run")
 
     def trace(self) -> RunTrace:
-        raise NotImplementedError(_PROMPT_NOT_READY_MESSAGE.format(name="LabPattern.trace"))
+        _raise_not_ready_public_api("LabPattern.trace")
 
     def draw(self) -> object:
-        raise NotImplementedError(_PROMPT_NOT_READY_MESSAGE.format(name="LabPattern.draw"))
+        _raise_not_ready_public_api("LabPattern.draw")
 
     def animate(self) -> object:
-        raise NotImplementedError(_PROMPT_NOT_READY_MESSAGE.format(name="LabPattern.animate"))
+        _raise_not_ready_public_api("LabPattern.animate")
 
     def compare_backends(self) -> BackendComparisonReport:
-        raise NotImplementedError(
-            _PROMPT_NOT_READY_MESSAGE.format(name="LabPattern.compare_backends")
-        )
+        _raise_not_ready_public_api("LabPattern.compare_backends")
 
     def _apply_graphix_pattern_method(self, method_name: str) -> LabPattern:
         updated_pattern = apply_graphix_pattern_method(self.pattern, method_name)
         object.__setattr__(self, "pattern", updated_pattern)
         return self
+
+
+def _raise_not_ready_public_api(name: str) -> NoReturn:
+    raise NotImplementedError(_UNIMPLEMENTED_PUBLIC_API_MESSAGE.format(name=name))

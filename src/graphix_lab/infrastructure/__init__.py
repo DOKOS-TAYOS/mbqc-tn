@@ -1,5 +1,5 @@
-"""Infrastructure helpers for filesystem and process interaction."""
+"""Infrastructure helpers for Graphix runtime and filesystem support."""
 
-from .graphix_capabilities import GraphixCapabilities, detect_graphix_capabilities, graphix_info
+from .graphix_capabilities import GraphixCapabilities, graphix_info
 
-__all__ = ["GraphixCapabilities", "detect_graphix_capabilities", "graphix_info"]
+__all__ = ["GraphixCapabilities", "graphix_info"]

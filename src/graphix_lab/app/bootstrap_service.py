@@ -46,10 +46,18 @@ SKIP_DIRECTORIES: tuple[str, ...] = (
     ".git",
     ".venv",
     "__pycache__",
+    ".pytest-tmp",
     ".pytest_cache",
     ".ruff_cache",
     ".mypy_cache",
+    ".pyright",
+    ".hypothesis",
+    ".tmp",
+    "pytest-cache",
+    "pytest-temp",
+    "test-artifacts",
 )
+SKIP_DIRECTORY_GLOBS: tuple[str, ...] = ("pytest-cache-files-*",)
 
 
 @dataclass(frozen=True, slots=True)
@@ -208,7 +216,13 @@ def _collect_text_changes(
     answers: BootstrapAnswers,
 ) -> list[PlannedChange]:
     changes: list[PlannedChange] = []
-    for path in _iter_text_files(workspace_root):
+    for path in iter_text_files(
+        workspace_root=workspace_root,
+        suffixes=TEXT_FILE_SUFFIXES,
+        file_names=TEXT_FILE_NAMES,
+        skip_directories=SKIP_DIRECTORIES,
+        skip_directory_globs=SKIP_DIRECTORY_GLOBS,
+    ):
         original_content = path.read_text(encoding="utf-8")
         updated_content = _updated_text_content(
             path, original_content, replacements, state, answers
@@ -216,15 +230,6 @@ def _collect_text_changes(
         if updated_content != original_content:
             changes.append(PlannedChange(path=path, description="Update template placeholders"))
     return changes
-
-
-def _iter_text_files(workspace_root: Path) -> list[Path]:
-    return iter_text_files(
-        workspace_root=workspace_root,
-        suffixes=TEXT_FILE_SUFFIXES,
-        file_names=TEXT_FILE_NAMES,
-        skip_directories=SKIP_DIRECTORIES,
-    )
 
 
 def _replace_text(content: str, replacements: list[tuple[str, str]]) -> str:
@@ -296,7 +301,13 @@ def _apply_text_replacements(
     state: TemplateState,
     answers: BootstrapAnswers,
 ) -> None:
-    for path in _iter_text_files(workspace_root):
+    for path in iter_text_files(
+        workspace_root=workspace_root,
+        suffixes=TEXT_FILE_SUFFIXES,
+        file_names=TEXT_FILE_NAMES,
+        skip_directories=SKIP_DIRECTORIES,
+        skip_directory_globs=SKIP_DIRECTORY_GLOBS,
+    ):
         original_content = path.read_text(encoding="utf-8")
         updated_content = _updated_text_content(
             path, original_content, replacements, state, answers

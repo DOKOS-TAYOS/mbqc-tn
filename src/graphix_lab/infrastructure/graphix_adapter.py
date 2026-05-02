@@ -1,12 +1,11 @@
 from __future__ import annotations
 
 from collections.abc import Callable, Iterable
-from importlib import import_module
-from types import ModuleType
 from typing import Protocol, cast, runtime_checkable
 
 from graphix_lab.domain.commands import CommandRecord
-from graphix_lab.domain.errors import GraphixCompatibilityError, GraphixUnavailableError
+from graphix_lab.domain.errors import GraphixCompatibilityError
+from graphix_lab.infrastructure.graphix_runtime import import_graphix_root, require_graphix_callable
 
 _KNOWN_COMMAND_KINDS = frozenset({"N", "E", "M", "X", "Z", "C"})
 
@@ -52,10 +51,12 @@ def create_graphix_circuit(width: int) -> GraphixCircuitProtocol:
 
 
 def load_graphix_circuit_class() -> Callable[[int], GraphixCircuitProtocol]:
-    graphix_module = _import_graphix_root()
-    circuit_class = getattr(graphix_module, "Circuit", None)
-    if not callable(circuit_class):
-        raise GraphixCompatibilityError(feature="Circuit")
+    graphix_module = import_graphix_root()
+    circuit_class = require_graphix_callable(
+        graphix_module,
+        "Circuit",
+        feature_name="Circuit",
+    )
     return cast(Callable[[int], GraphixCircuitProtocol], circuit_class)
 
 
@@ -271,21 +272,3 @@ def _coerce_float(value: object) -> float | None:
         except (TypeError, ValueError):
             return None
     return None
-
-
-def _import_graphix_root() -> ModuleType:
-    try:
-        return import_module("graphix")
-    except ModuleNotFoundError as error:
-        if error.name == "graphix":
-            raise GraphixUnavailableError() from error
-        raise GraphixCompatibilityError(
-            message=(
-                "Graphix appears to be installed, but importing it failed because a required "
-                f"dependency could not be loaded: {error.name!r}."
-            )
-        ) from error
-    except Exception as error:  # pragma: no cover - defensive fallback
-        raise GraphixCompatibilityError(
-            message="Graphix is installed but could not be imported cleanly."
-        ) from error

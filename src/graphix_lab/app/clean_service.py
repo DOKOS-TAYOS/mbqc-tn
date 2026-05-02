@@ -8,6 +8,7 @@ from pathlib import Path
 
 DIRECTORY_PATTERNS: tuple[str, ...] = (
     "__pycache__",
+    ".pytest-tmp",
     ".pytest_cache",
     ".ruff_cache",
     ".mypy_cache",

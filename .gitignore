@@ -1,4 +1,7 @@
 .venv/
+.pytest_cache/
+.pytest-tmp/
+.hypothesis/
 .coverage
 .coverage.*
 .tmp/

@@ -34,6 +34,8 @@ This repository has already been bootstrapped as Graphix Lab. Do not rerun `boot
 3. Run `bin\quality.cmd` on Windows or `./bin/quality.sh` on Linux/macOS.
 4. After installing or changing runtime dependencies, regenerate `THIRD_PARTY_LICENSES` with `python scripts/run_template_command.py licenses`.
 
+If you change `pyproject.toml`, rerun `python -m pip install -e .[dev]` inside `.venv` before trusting runtime features or the quality checks. That keeps Graphix Lab, Graphix itself, and the dev tools aligned with the declared project dependencies.
+
 The wrappers in `bin/` stay useful because they prefer the local `.venv` interpreter and keep the quality flow consistent across Windows and Linux/macOS.
 
 ## Project Scope

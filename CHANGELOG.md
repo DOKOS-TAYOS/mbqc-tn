@@ -6,6 +6,7 @@ All notable changes to this project are documented in this file.
 
 ### Added
 
+- Integration tests that exercise the real Graphix runtime through `graphix_info()` and the public `circuit(...).compile().commands()` flow, so missing or incompatible Graphix installations now fail the quality checks instead of hiding behind fake-only coverage.
 - `LabPattern.commands()` now returns stable `CommandRecord` tuples by normalizing Graphix pattern commands through a defensive adapter that supports the known `N`, `E`, `M`, `X`, `Z`, and `C` command kinds, preserves raw `repr` output, and falls back to `kind="UNKNOWN"` for unrecognized command objects.
 - A Graphix-backed `LabPattern` wrapper that keeps a live Graphix pattern reference, supports fluent `standardize()`, `shift_signals()`, and `perform_pauli_measurements()` mutation helpers, exposes `copy()` when the runtime provides `Pattern.copy()`, and raises clear `GraphixCompatibilityError` messages when a pattern API is missing.
 - Focused unit coverage for the live `LabPattern` wrapper, including compile-to-pattern flow, method chaining, copy semantics, and compatibility failures against a fake Graphix runtime.
@@ -26,6 +27,10 @@ All notable changes to this project are documented in this file.
 
 ### Fixed
 
+- Internal wording now matches the current repo shape more closely, including the `graphix_lab.infrastructure` package description, the small internal export surface at that package root, and a few docs that still spoke as if Graphix Lab were an unbootstrapped template checkout.
+- The tiny internal `process_runner` wrapper is gone; CLI/tooling subprocess calls now run directly, the bootstrap text-file passthrough was removed, and the `graphix_lab.app` package docstring now reflects the real application-service scope.
+- Internal Graphix runtime import and callable resolution logic now goes through one shared helper module, which removes redundant compatibility code without changing the public API or CLI surface.
+- Bootstrap scanning, temporary-workspace copying, cleanup rules, git ignores, and Ruff excludes now treat repo-local temp/cache directories more consistently, including `.pytest-tmp`, `.pytest_cache`, `.pyright`, `.hypothesis`, and `pytest-cache-files-*`.
 - Bootstrap now wraps long generated `scope_summary` values in `template_metadata.py`, which keeps post-bootstrap Ruff runs green for verbose project descriptions.
 - Bootstrap no longer rewrites `THIRD_PARTY_LICENSES` as plain text during identity replacement; the inventory now changes only when the explicit license-generation step runs.
 - `THIRD_PARTY_LICENSES` generation now stays compact and uses the active project interpreter instead of expanding full license texts or scanning unrelated global packages.
@@ -43,6 +48,7 @@ All notable changes to this project are documented in this file.
 
 ### Changed
 
+- The README and troubleshooting docs now state explicitly that changing `pyproject.toml` requires rerunning `python -m pip install -e .[dev]` inside `.venv` before relying on Graphix runtime features or quality results.
 - CI no longer runs the inherited template-bootstrap smoke job or ships the dedicated `scripts/bootstrap_smoke.py` helper, because this repository is now a bootstrapped Graphix Lab library rather than a reusable fresh-template source.
 - `docs/api.md` now documents the live `LabPattern.commands()` behavior, including how command kinds, measurement metadata, correction domains, and unknown-command fallbacks are exposed through `CommandRecord`.
 - `docs/api.md` now documents the live `LabPattern` wrapper semantics, including in-place mutation behavior, fluent chaining, and runtime-dependent `copy()` support.

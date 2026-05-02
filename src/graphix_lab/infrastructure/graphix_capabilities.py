@@ -1,10 +1,11 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from importlib import import_module, metadata
+from importlib import metadata
 from types import ModuleType
 
 from graphix_lab.domain.errors import GraphixCompatibilityError, GraphixUnavailableError
+from graphix_lab.infrastructure.graphix_runtime import import_graphix_root, optional_import_module
 
 _GRAPHIX_DISTRIBUTION_NAME = "graphix"
 _BACKEND_MODULES: tuple[tuple[str, str, tuple[str, ...]], ...] = (
@@ -35,9 +36,9 @@ def graphix_info() -> GraphixCapabilities:
 
 def detect_graphix_capabilities() -> GraphixCapabilities:
     version = _detect_graphix_version()
-    graphix_module = _import_graphix_root()
+    graphix_module = import_graphix_root()
     pattern_type = _load_pattern_type(graphix_module)
-    simulator_module = _optional_import("graphix.simulator")
+    simulator_module = optional_import_module("graphix.simulator")
 
     return GraphixCapabilities(
         version=version,
@@ -67,30 +68,12 @@ def _detect_graphix_version() -> str:
         ) from error
 
 
-def _import_graphix_root() -> ModuleType:
-    try:
-        return import_module("graphix")
-    except ModuleNotFoundError as error:
-        if error.name == "graphix":
-            raise GraphixUnavailableError() from error
-        raise GraphixCompatibilityError(
-            message=(
-                "Graphix appears to be installed, but importing it failed because a required "
-                f"dependency could not be loaded: {error.name!r}."
-            )
-        ) from error
-    except Exception as error:  # pragma: no cover - defensive fallback
-        raise GraphixCompatibilityError(
-            message="Graphix is installed but could not be imported cleanly."
-        ) from error
-
-
 def _load_pattern_type(graphix_module: ModuleType) -> type[object] | None:
     exported_pattern = getattr(graphix_module, "Pattern", None)
     if isinstance(exported_pattern, type):
         return exported_pattern
 
-    pattern_module = _optional_import("graphix.pattern")
+    pattern_module = optional_import_module("graphix.pattern")
     if pattern_module is None:
         return None
 
@@ -111,7 +94,7 @@ def _detect_supported_backends(
     supported_backends: list[str] = []
 
     for backend_name, module_name, attribute_names in _BACKEND_MODULES:
-        backend_module = _optional_import(module_name)
+        backend_module = optional_import_module(module_name)
         search_modules = tuple(
             module
             for module in (backend_module, simulator_module, graphix_module)
@@ -125,12 +108,3 @@ def _detect_supported_backends(
 
 def _module_has_any_attr(module: ModuleType, attribute_names: tuple[str, ...]) -> bool:
     return any(hasattr(module, attribute_name) for attribute_name in attribute_names)
-
-
-def _optional_import(module_name: str) -> ModuleType | None:
-    try:
-        return import_module(module_name)
-    except ModuleNotFoundError:
-        return None
-    except Exception:  # pragma: no cover - defensive fallback
-        return None

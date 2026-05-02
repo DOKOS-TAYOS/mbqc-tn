@@ -5,8 +5,10 @@ from types import ModuleType
 import pytest
 
 import graphix_lab.infrastructure.graphix_capabilities as graphix_capabilities_module
+import graphix_lab.infrastructure.graphix_runtime as graphix_runtime_module
 from graphix_lab import graphix_info
 from graphix_lab.domain.errors import GraphixUnavailableError
+from graphix_lab.infrastructure import __all__ as infrastructure_public_names
 from graphix_lab.infrastructure.graphix_capabilities import GraphixCapabilities
 
 
@@ -74,6 +76,11 @@ def _build_fake_graphix_modules() -> dict[str, ModuleType]:
     }
 
 
+def test_infrastructure_package_exports_only_intended_helpers() -> None:
+    assert set(infrastructure_public_names) == {"GraphixCapabilities", "graphix_info"}
+    assert "detect_graphix_capabilities" not in infrastructure_public_names
+
+
 def test_graphix_info_reports_detected_capabilities_when_graphix_is_available(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -89,7 +96,7 @@ def test_graphix_info_reports_detected_capabilities_when_graphix_is_available(
         raise ModuleNotFoundError(module_name)
 
     monkeypatch.setattr(graphix_capabilities_module.metadata, "version", fake_version)
-    monkeypatch.setattr(graphix_capabilities_module, "import_module", fake_import_module)
+    monkeypatch.setattr(graphix_runtime_module, "import_module", fake_import_module)
 
     assert graphix_info() == GraphixCapabilities(
         version="0.3.5",

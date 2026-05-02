@@ -1,1 +1,1 @@
-"""Application services for the template package."""
+"""Application services for Graphix Lab workflows."""

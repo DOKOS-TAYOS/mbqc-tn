@@ -2,12 +2,12 @@ from __future__ import annotations
 
 import math
 
-from graphix_lab.domain.errors import GraphixCompatibilityError
 from graphix_lab.infrastructure.graphix_adapter import (
     GraphixCircuitProtocol,
     create_graphix_circuit,
     extract_pattern_from_transpile_result,
 )
+from graphix_lab.infrastructure.graphix_runtime import require_graphix_callable
 
 
 def build_graphix_circuit(width: int) -> GraphixCircuitProtocol:
@@ -43,9 +43,11 @@ def apply_cnot_gate(
 
 
 def compile_graphix_circuit(graphix_circuit: GraphixCircuitProtocol) -> object:
-    transpile_method = getattr(graphix_circuit, "transpile", None)
-    if not callable(transpile_method):
-        raise GraphixCompatibilityError(feature="Circuit.transpile")
+    transpile_method = require_graphix_callable(
+        graphix_circuit,
+        "transpile",
+        feature_name="Circuit.transpile",
+    )
     transpile_result = transpile_method()
     return extract_pattern_from_transpile_result(transpile_result)
 
@@ -67,7 +69,9 @@ def _call_graphix_gate(
     gate_name: str,
     *args: int | float,
 ) -> None:
-    graphix_gate = getattr(graphix_circuit, gate_name, None)
-    if not callable(graphix_gate):
-        raise GraphixCompatibilityError(feature=f"Circuit.{gate_name}")
+    graphix_gate = require_graphix_callable(
+        graphix_circuit,
+        gate_name,
+        feature_name=f"Circuit.{gate_name}",
+    )
     graphix_gate(*args)

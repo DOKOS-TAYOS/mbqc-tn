@@ -12,6 +12,7 @@ import pytest
 import graphix_lab.cli as cli_module
 from graphix_lab.app.bootstrap_service import (
     SKIP_DIRECTORIES,
+    SKIP_DIRECTORY_GLOBS,
     TEXT_FILE_NAMES,
     TEXT_FILE_SUFFIXES,
     BootstrapAnswers,
@@ -71,19 +72,11 @@ def _restore_template_metadata_scope_summary(content: str) -> str:
 
 
 def _copy_template_workspace(source_root: Path, workspace: Path) -> None:
+    bootstrap_ignored_patterns = (*SKIP_DIRECTORIES, *SKIP_DIRECTORY_GLOBS)
     shutil.copytree(
         source_root,
         workspace,
-        ignore=shutil.ignore_patterns(
-            ".git",
-            ".venv",
-            "__pycache__",
-            ".tmp",
-            "pytest-cache",
-            "pytest-temp",
-            "test-artifacts",
-            "pytest-cache-files-*",
-        ),
+        ignore=shutil.ignore_patterns(*bootstrap_ignored_patterns),
     )
     _restore_public_template_state(workspace)
 
@@ -113,6 +106,7 @@ def _restore_public_template_state(workspace: Path) -> None:
         suffixes=TEXT_FILE_SUFFIXES,
         file_names=TEXT_FILE_NAMES,
         skip_directories=SKIP_DIRECTORIES,
+        skip_directory_globs=SKIP_DIRECTORY_GLOBS,
     ):
         if path.name == "THIRD_PARTY_LICENSES":
             continue
@@ -357,8 +351,13 @@ def test_bootstrap_cli_reinstalls_for_the_new_package_name(
         del workspace_root, answers, dry_run
         return BootstrapResult(changed=True, changes=(planned_change,))
 
-    def fake_run_process(command: list[str], root: Path) -> CompletedProcess[bytes]:
-        del root
+    def fake_subprocess_run(
+        command: list[str],
+        check: bool,
+        cwd: Path,
+    ) -> CompletedProcess[bytes]:
+        assert check is False
+        assert cwd == workspace
         return CompletedProcess(args=command, returncode=0)
 
     monkeypatch.chdir(workspace)
@@ -367,11 +366,7 @@ def test_bootstrap_cli_reinstalls_for_the_new_package_name(
         "bootstrap_template",
         fake_bootstrap_template,
     )
-    monkeypatch.setattr(
-        cli_module,
-        "run_process",
-        fake_run_process,
-    )
+    monkeypatch.setattr(cli_module.subprocess, "run", fake_subprocess_run)
 
     def unexpected_prompt(label: str, default: str | None = None) -> str:
         pytest.fail(f"Unexpected prompt for {label} with {default}")

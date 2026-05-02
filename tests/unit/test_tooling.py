@@ -2,12 +2,17 @@ from __future__ import annotations
 
 import sys
 from pathlib import Path
+from subprocess import CompletedProcess
 
+import pytest
+
+import graphix_lab.app.tooling_service as tooling_service
 from graphix_lab.app.tooling_service import (
     build_bootstrap_resync_command,
     build_license_command,
     build_quality_commands,
     build_test_command,
+    run_commands,
 )
 
 
@@ -60,3 +65,52 @@ def test_bootstrap_resync_command_uses_active_interpreter() -> None:
         "-e",
         ".[dev]",
     ]
+
+
+def test_run_commands_uses_subprocess_with_workspace_root(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    calls: list[tuple[list[str], bool, Path]] = []
+
+    def fake_subprocess_run(
+        command: list[str],
+        check: bool,
+        cwd: Path,
+    ) -> CompletedProcess[bytes]:
+        calls.append((command, check, cwd))
+        return CompletedProcess(args=command, returncode=0)
+
+    monkeypatch.setattr(tooling_service.subprocess, "run", fake_subprocess_run)
+
+    results = run_commands([["cmd-one"], ["cmd-two"]], root=Path("workspace"))
+
+    assert [result.command for result in results] == [("cmd-one",), ("cmd-two",)]
+    assert [result.returncode for result in results] == [0, 0]
+    assert calls == [
+        (["cmd-one"], False, Path("workspace")),
+        (["cmd-two"], False, Path("workspace")),
+    ]
+
+
+def test_run_commands_stops_after_the_first_failure(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    calls: list[list[str]] = []
+
+    def fake_subprocess_run(
+        command: list[str],
+        check: bool,
+        cwd: Path,
+    ) -> CompletedProcess[bytes]:
+        del check, cwd
+        calls.append(command)
+        return_code = 1 if command == ["cmd-one"] else 0
+        return CompletedProcess(args=command, returncode=return_code)
+
+    monkeypatch.setattr(tooling_service.subprocess, "run", fake_subprocess_run)
+
+    results = run_commands([["cmd-one"], ["cmd-two"]], root=Path("workspace"))
+
+    assert [result.command for result in results] == [("cmd-one",)]
+    assert [result.returncode for result in results] == [1]
+    assert calls == [["cmd-one"]]

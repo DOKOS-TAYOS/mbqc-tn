@@ -42,6 +42,15 @@ def test_collect_cleanup_paths_matches_generated_pytest_cache_directories(temp_d
     assert generated_cache_dir in cleanup_paths
 
 
+def test_collect_cleanup_paths_matches_pytest_base_temp_directories(temp_dir: Path) -> None:
+    base_temp_dir = temp_dir / ".pytest-tmp"
+    base_temp_dir.mkdir()
+
+    cleanup_paths = collect_cleanup_paths(temp_dir)
+
+    assert base_temp_dir in cleanup_paths
+
+
 def test_collect_cleanup_paths_skips_directories_that_contain_nested_virtual_environments(
     temp_dir: Path,
 ) -> None:

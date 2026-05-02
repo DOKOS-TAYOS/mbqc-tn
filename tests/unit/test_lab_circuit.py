@@ -7,7 +7,7 @@ from typing import cast
 
 import pytest
 
-import graphix_lab.infrastructure.graphix_adapter as graphix_adapter_module
+import graphix_lab.infrastructure.graphix_runtime as graphix_runtime_module
 from graphix_lab import LabCircuit, LabPattern, circuit
 
 
@@ -71,7 +71,7 @@ def _install_fake_graphix(monkeypatch: pytest.MonkeyPatch) -> None:
             return fake_graphix
         raise ModuleNotFoundError(name=module_name)
 
-    monkeypatch.setattr(graphix_adapter_module, "import_module", fake_import_module)
+    monkeypatch.setattr(graphix_runtime_module, "import_module", fake_import_module)
 
 
 def _unwrap_graphix_circuit(lab_circuit: LabCircuit) -> FakeGraphixCircuit:

@@ -1,11 +1,10 @@
 from __future__ import annotations
 
+import subprocess
 import sys
 import tomllib
 from dataclasses import dataclass
 from pathlib import Path
-
-from ..infrastructure.process_runner import run_process
 
 
 @dataclass(frozen=True, slots=True)
@@ -73,7 +72,7 @@ def build_license_command(output_file: Path, distribution_name: str) -> list[str
 def run_commands(commands: list[list[str]], root: Path) -> list[CommandExecutionResult]:
     results: list[CommandExecutionResult] = []
     for command in commands:
-        completed_process = run_process(command, root=root)
+        completed_process = subprocess.run(command, check=False, cwd=root)
         results.append(
             CommandExecutionResult(
                 command=tuple(command),

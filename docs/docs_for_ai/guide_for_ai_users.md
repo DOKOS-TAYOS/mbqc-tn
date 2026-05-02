@@ -6,7 +6,7 @@
 2. Read `docs/api.md` for the public API and CLI contract.
 3. Read `examples/library_usage.py` and `examples/cli_usage.py` only if you need usage examples.
 4. Read `docs/docs_for_ai/project_ai_instructions.md` only before changing code.
-5. Use the wrappers in `bin/` while the template package name is still provisional.
+5. Use the wrappers in `bin/` to stay aligned with the repo's active `.venv` and package entrypoints.
 
 ## What Not to Assume
 

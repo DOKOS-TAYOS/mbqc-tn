@@ -21,7 +21,7 @@ Use this template to build software projects with a stable Python core, minimal 
 - Update `CHANGELOG.md` when adding, fixing, or changing something meaningful.
 - Do not remove `.venv` or clean it as part of project cleanup.
 - Prefer Windows-safe commands, but keep Linux support where practical.
-- Prefer the stable wrappers in `bin/` while the template package name is still provisional.
+- Prefer the stable wrappers in `bin/` so commands keep using the repo's active `.venv` and package entrypoints.
 - Treat `bootstrap` as a one-time setup command. If it already ran, do not try to re-run it.
 - Treat `docs/api.md` and the example scripts as contract documentation.
 

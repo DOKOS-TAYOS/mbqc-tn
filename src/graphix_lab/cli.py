@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import subprocess
 from collections.abc import Sequence
 from pathlib import Path
 
@@ -21,7 +22,6 @@ from .app.tooling_service import (
     load_distribution_name,
     run_commands,
 )
-from .infrastructure.process_runner import run_process
 
 
 def main(argv: Sequence[str] | None = None) -> int:
@@ -114,11 +114,11 @@ def _handle_bootstrap(args: argparse.Namespace) -> int:
 
     resync_command = build_bootstrap_resync_command()
     print("Resyncing editable install:")
-    print(f"- {_format_command(resync_command)}")
-    completed_process = run_process(resync_command, root=project_root)
+    print(f"- {' '.join(resync_command)}")
+    completed_process = subprocess.run(resync_command, check=False, cwd=project_root)
     if completed_process.returncode != 0:
         print("Automatic resync failed. Run this command manually:")
-        print(f"- {_format_command(resync_command)}")
+        print(f"- {' '.join(resync_command)}")
         return completed_process.returncode or 1
     print("Editable install resynced successfully.")
     return 0
@@ -136,7 +136,7 @@ def _handle_quality(args: argparse.Namespace) -> int:
 
 def _handle_test(args: argparse.Namespace) -> int:
     del args
-    completed_process = run_process(build_test_command(), root=Path.cwd())
+    completed_process = subprocess.run(build_test_command(), check=False, cwd=Path.cwd())
     return completed_process.returncode
 
 
@@ -157,9 +157,10 @@ def _handle_clean(args: argparse.Namespace) -> int:
 def _handle_licenses(args: argparse.Namespace) -> int:
     project_root = Path.cwd()
     distribution_name = load_distribution_name(project_root)
-    completed_process = run_process(
+    completed_process = subprocess.run(
         build_license_command(Path(args.output), distribution_name),
-        root=project_root,
+        check=False,
+        cwd=project_root,
     )
     return completed_process.returncode
 
@@ -175,10 +176,6 @@ def _prompt(label: str, default: str | None = None) -> str:
     if default is not None:
         return default
     raise ValueError(f"{label} is required.")
-
-
-def _format_command(command: Sequence[str]) -> str:
-    return " ".join(command)
 
 
 if __name__ == "__main__":

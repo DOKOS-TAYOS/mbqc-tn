@@ -29,6 +29,16 @@ The command only lists third-party packages from the active interpreter. If the 
 - confirm the package imports from `src`
 - keep function typing explicit
 
+## Runtime Features Fail After Editing `pyproject.toml`
+
+Graphix Lab reads its runtime dependencies from the active `.venv`. If you changed `pyproject.toml`, reinstall the editable project before debugging Graphix-specific failures:
+
+```bash
+python -m pip install -e .[dev]
+```
+
+This refreshes both the Graphix runtime dependency and the local editable package metadata.
+
 ## Cleanup Removed Too Much
 
 The cleanup command should never touch `.venv`. If it does, stop using that version of the script and add a regression test before changing the cleanup rules.

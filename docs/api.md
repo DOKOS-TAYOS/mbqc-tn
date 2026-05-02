@@ -149,6 +149,6 @@ domain error instead of failing with a raw import error.
 - `quality` runs Ruff, pytest, and pyright through the active interpreter, which keeps `.venv` resolution consistent on Windows and Linux.
 - `test` runs pytest through the active interpreter.
 - `clean` removes caches and temporary artifacts, but stays conservative around `.venv`, `.git`, and inaccessible subtrees.
-- `licenses` regenerates `THIRD_PARTY_LICENSES` from the active interpreter and excludes the local template package.
+- `licenses` regenerates `THIRD_PARTY_LICENSES` from the active interpreter and excludes the current project package.
 
 Treat everything outside `src/graphix_lab/__init__.py` and the CLI subcommands as internal implementation detail.
