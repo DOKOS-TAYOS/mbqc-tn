@@ -6,6 +6,8 @@ All notable changes to this project are documented in this file.
 
 ### Added
 
+- A Graphix-backed `LabPattern` wrapper that keeps a live Graphix pattern reference, supports fluent `standardize()`, `shift_signals()`, and `perform_pauli_measurements()` mutation helpers, exposes `copy()` when the runtime provides `Pattern.copy()`, and raises clear `GraphixCompatibilityError` messages when a pattern API is missing.
+- Focused unit coverage for the live `LabPattern` wrapper, including compile-to-pattern flow, method chaining, copy semantics, and compatibility failures against a fake Graphix runtime.
 - A Graphix-backed `LabCircuit` fluent wrapper that chains `h`, `x`, `y`, `z`, `s`, `rx`, `ry`, `rz`, and `cnot`, exposes `to_graphix()`, and compiles through `circuit.transpile().pattern` into `LabPattern`.
 - Explicit angle-unit handling for `LabCircuit` rotations, with public `pi` units by default, `radians` conversion support, and clear errors for unsupported units.
 - Focused unit coverage for the new circuit wrapper using a fake Graphix runtime, so the public API stays testable even when Graphix is missing from the active `.venv`.
@@ -40,6 +42,7 @@ All notable changes to this project are documented in this file.
 
 ### Changed
 
+- `docs/api.md` now documents the live `LabPattern` wrapper semantics, including in-place mutation behavior, fluent chaining, and runtime-dependent `copy()` support.
 - `docs/api.md` now documents the live `LabCircuit` wrapper behavior instead of describing the circuit entrypoint as a future stub.
 - The placeholder `TemplateMetadata` top-level API has been retired in favor of the Graphix Lab public surface, and `docs/api.md` plus `examples/library_usage.py` now reflect the new domain-model-first contract.
 - The public API docs and regression tests now include the new `graphix_info()` runtime inspection entrypoint.

@@ -2,8 +2,8 @@
 
 ## Public Python API
 
-Graphix Lab now exposes its public domain model plus the first live Graphix
-wrapper entrypoints.
+Graphix Lab now exposes its public domain model plus live Graphix wrapper
+entrypoints for circuits and patterns.
 
 ```python
 from graphix_lab import (
@@ -74,9 +74,32 @@ Rotation angles are explicit:
 
 ### `from_graphix_pattern(pattern: object) -> LabPattern`
 
-Wraps a raw Graphix pattern object in `LabPattern`. In this prompt,
-`to_graphix()` remains the only live pattern method; higher-level pattern
-operations arrive later.
+Wraps a raw Graphix pattern object in `LabPattern` by reference.
+
+Available live pattern methods in this prompt:
+
+- `.to_graphix()`
+- `.copy()`
+- `.standardize()`
+- `.shift_signals()`
+- `.perform_pauli_measurements()`
+
+Mutation semantics are explicit:
+
+- `standardize()`, `shift_signals()`, and `perform_pauli_measurements()`
+  mutate the wrapped Graphix pattern and return the same `LabPattern` wrapper
+  for fluent chaining.
+- If a Graphix runtime method returns a replacement pattern object instead of
+  mutating in place, Graphix Lab keeps the wrapper aligned to that replacement
+  and still returns `self`.
+- `copy()` is only available when the active Graphix runtime exposes
+  `Pattern.copy()`. If that method is missing, Graphix Lab raises
+  `GraphixCompatibilityError` with a clear message explaining that the wrapper
+  otherwise works in place.
+
+If an installed Graphix version does not expose one of the required pattern
+methods, Graphix Lab raises `GraphixCompatibilityError` instead of failing with
+an unhelpful attribute error.
 
 ### `from_qiskit(qc: object, *, angle_units: str = "radians") -> LabCircuit`
 

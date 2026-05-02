@@ -9,6 +9,7 @@ from .app.circuit_service import (
     build_graphix_circuit,
     compile_graphix_circuit,
 )
+from .app.pattern_service import apply_graphix_pattern_method, copy_graphix_pattern
 from .domain.commands import CommandRecord
 from .domain.simulation import BackendComparisonReport, SimulationReport
 from .domain.summaries import PatternSummary, ResourceSummary
@@ -108,18 +109,17 @@ class LabPattern:
         return self.pattern
 
     def copy(self) -> LabPattern:
-        raise NotImplementedError(_PROMPT_NOT_READY_MESSAGE.format(name="LabPattern.copy"))
+        copied_pattern = copy_graphix_pattern(self.pattern)
+        return LabPattern(pattern=copied_pattern)
 
     def standardize(self) -> LabPattern:
-        raise NotImplementedError(_PROMPT_NOT_READY_MESSAGE.format(name="LabPattern.standardize"))
+        return self._apply_graphix_pattern_method("standardize")
 
     def shift_signals(self) -> LabPattern:
-        raise NotImplementedError(_PROMPT_NOT_READY_MESSAGE.format(name="LabPattern.shift_signals"))
+        return self._apply_graphix_pattern_method("shift_signals")
 
     def perform_pauli_measurements(self) -> LabPattern:
-        raise NotImplementedError(
-            _PROMPT_NOT_READY_MESSAGE.format(name="LabPattern.perform_pauli_measurements")
-        )
+        return self._apply_graphix_pattern_method("perform_pauli_measurements")
 
     def commands(self) -> tuple[CommandRecord, ...]:
         raise NotImplementedError(_PROMPT_NOT_READY_MESSAGE.format(name="LabPattern.commands"))
@@ -156,3 +156,8 @@ class LabPattern:
         raise NotImplementedError(
             _PROMPT_NOT_READY_MESSAGE.format(name="LabPattern.compare_backends")
         )
+
+    def _apply_graphix_pattern_method(self, method_name: str) -> LabPattern:
+        updated_pattern = apply_graphix_pattern_method(self.pattern, method_name)
+        object.__setattr__(self, "pattern", updated_pattern)
+        return self
