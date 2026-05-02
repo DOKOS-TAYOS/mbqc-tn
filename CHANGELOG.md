@@ -6,6 +6,7 @@ All notable changes to this project are documented in this file.
 
 ### Added
 
+- The public `graphix_lab` package now exports frozen Graphix Lab domain models for commands, summaries, traces, simulations, and backend comparisons, plus lightweight `LabCircuit` and `LabPattern` wrapper stubs that reserve the long-term import surface without pulling in Graphix yet.
 - A defensive Graphix capability adapter with typed domain errors, a frozen `GraphixCapabilities` dataclass, and a public `graphix_info()` entrypoint for inspecting the active Graphix runtime.
 - Graphix Lab planning documents under `docs/graphix_lab/`, covering scope, architecture, public API, Graphix integration, visualization, Qiskit, testing, packaging, roadmap, and template integration.
 - `docs/docs_for_ai/graphix_lab_status_addendum.md` so future handoffs keep Graphix-specific phase, blocker, and quality context next to the main AI status board.
@@ -36,6 +37,7 @@ All notable changes to this project are documented in this file.
 
 ### Changed
 
+- The placeholder `TemplateMetadata` top-level API has been retired in favor of the Graphix Lab public surface, and `docs/api.md` plus `examples/library_usage.py` now reflect the new domain-model-first contract.
 - The public API docs and regression tests now include the new `graphix_info()` runtime inspection entrypoint.
 - The root README and documentation index now frame the repository as Graphix Lab and point readers to the new project-specific planning docs instead of template-only guidance.
 - Runtime dependency metadata now declares Graphix, Matplotlib, NetworkX, and NumPy as core dependencies, plus optional `qiskit` and `examples` extras, while preserving the existing `dev` tooling set.

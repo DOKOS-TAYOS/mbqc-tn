@@ -2,33 +2,68 @@
 
 ## Public Python API
 
-The template keeps the public Python API intentionally small.
+Graphix Lab now exposes the initial public domain model and reserved entrypoints
+for the upcoming Graphix-backed wrappers.
 
 ```python
-from graphix_lab import TemplateMetadata, get_template_metadata, graphix_info
+from graphix_lab import (
+    BackendComparisonReport,
+    BackendRunReport,
+    CommandRecord,
+    GraphixCapabilities,
+    LabCircuit,
+    LabPattern,
+    PatternSummary,
+    ResourceSummary,
+    RunTrace,
+    SimulationReport,
+    TraceFrame,
+    circuit,
+    from_graphix_pattern,
+    from_qiskit,
+    graphix_info,
+)
 ```
 
-### `TemplateMetadata`
+### Stable domain models
 
-Immutable dataclass describing the current template metadata:
+- `CommandRecord`
+- `PatternSummary`
+- `ResourceSummary`
+- `TraceFrame`
+- `RunTrace`
+- `SimulationReport`
+- `BackendRunReport`
+- `BackendComparisonReport`
 
-- `package_name`
-- `distribution_name`
-- `project_title`
-- `bootstrap_required`
-- `scope_summary`
-- `cli_commands`
+All of these are frozen dataclasses with typed fields so later prompts can build
+command summaries, traces, simulation reports, and backend comparisons on top
+of a stable contract.
 
-### `get_template_metadata()`
+### Reserved wrapper entrypoints
 
-Returns the current `TemplateMetadata` snapshot.
+### `circuit(width: int) -> LabCircuit`
 
-### `graphix_info()`
+Creates a lightweight `LabCircuit` placeholder object today. The Graphix-backed
+fluent builder behavior arrives in the next prompt without changing the import
+surface.
+
+### `from_graphix_pattern(pattern: object) -> LabPattern`
+
+Wraps a raw pattern object in a lightweight `LabPattern` placeholder. For this
+prompt, only `to_graphix()` is live; Graphix operations are still deferred.
+
+### `from_qiskit(qc: object, *, angle_units: str = "radians") -> LabCircuit`
+
+Reserved public entrypoint for the later Qiskit adapter. It currently raises a
+clear `NotImplementedError` instead of pretending the adapter exists.
+
+### `graphix_info() -> GraphixCapabilities`
 
 Returns a `GraphixCapabilities` snapshot for the active Graphix runtime.
 
 If Graphix is not installed in the active `.venv`, this function raises a clear
-`GraphixUnavailableError` instead of failing with a raw import error.
+domain error instead of failing with a raw import error.
 
 ## Public CLI
 
@@ -45,7 +80,5 @@ If Graphix is not installed in the active `.venv`, this function raises a clear
 - `test` runs pytest through the active interpreter.
 - `clean` removes caches and temporary artifacts, but stays conservative around `.venv`, `.git`, and inaccessible subtrees.
 - `licenses` regenerates `THIRD_PARTY_LICENSES` from the active interpreter and excludes the local template package.
-
-During template stage, `graphix_lab` is still a placeholder package name. After bootstrap, the module path changes. The `bin/` wrappers are the stable user-facing entrypoints across that rename.
 
 Treat everything outside `src/graphix_lab/__init__.py` and the CLI subcommands as internal implementation detail.
