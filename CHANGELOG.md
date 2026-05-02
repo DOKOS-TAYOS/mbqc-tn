@@ -43,6 +43,7 @@ All notable changes to this project are documented in this file.
 
 ### Changed
 
+- CI no longer runs the inherited template-bootstrap smoke job or ships the dedicated `scripts/bootstrap_smoke.py` helper, because this repository is now a bootstrapped Graphix Lab library rather than a reusable fresh-template source.
 - `docs/api.md` now documents the live `LabPattern.commands()` behavior, including how command kinds, measurement metadata, correction domains, and unknown-command fallbacks are exposed through `CommandRecord`.
 - `docs/api.md` now documents the live `LabPattern` wrapper semantics, including in-place mutation behavior, fluent chaining, and runtime-dependent `copy()` support.
 - `docs/api.md` now documents the live `LabCircuit` wrapper behavior instead of describing the circuit entrypoint as a future stub.

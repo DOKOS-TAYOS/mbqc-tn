@@ -16,7 +16,7 @@
 - [x] AI documentation baseline exists
 - [x] Bootstrap resyncs the editable install
 - [x] Bootstrap refuses re-running after template setup is complete
-- [x] CI validates a fresh template copy through bootstrap plus quality
+- [x] CI focuses on the bootstrapped Graphix Lab library checks instead of inherited template-bootstrap smoke
 - [x] Minimal stable wrappers exist
 - [x] Cleanup command protects `.venv`
 - [x] Cleanup tolerates inaccessible subtrees conservatively

@@ -72,23 +72,3 @@ jobs:
       - name: Pyright on Windows
         run: .\.venv\Scripts\python.exe -m pyright
         if: runner.os == 'Windows'
-
-  template-smoke:
-    runs-on: ${{ matrix.os }}
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [ubuntu-latest, windows-latest]
-        python-version: ["3.12"]
-
-    steps:
-      - name: Check out repository
-        uses: actions/checkout@v4
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: ${{ matrix.python-version }}
-
-      - name: Fresh template bootstrap smoke
-        run: python scripts/bootstrap_smoke.py --workspace-root "${{ runner.temp }}/template-smoke"
