@@ -6,6 +6,9 @@ All notable changes to this project are documented in this file.
 
 ### Added
 
+- A Graphix-backed `LabCircuit` fluent wrapper that chains `h`, `x`, `y`, `z`, `s`, `rx`, `ry`, `rz`, and `cnot`, exposes `to_graphix()`, and compiles through `circuit.transpile().pattern` into `LabPattern`.
+- Explicit angle-unit handling for `LabCircuit` rotations, with public `pi` units by default, `radians` conversion support, and clear errors for unsupported units.
+- Focused unit coverage for the new circuit wrapper using a fake Graphix runtime, so the public API stays testable even when Graphix is missing from the active `.venv`.
 - The public `graphix_lab` package now exports frozen Graphix Lab domain models for commands, summaries, traces, simulations, and backend comparisons, plus lightweight `LabCircuit` and `LabPattern` wrapper stubs that reserve the long-term import surface without pulling in Graphix yet.
 - A defensive Graphix capability adapter with typed domain errors, a frozen `GraphixCapabilities` dataclass, and a public `graphix_info()` entrypoint for inspecting the active Graphix runtime.
 - Graphix Lab planning documents under `docs/graphix_lab/`, covering scope, architecture, public API, Graphix integration, visualization, Qiskit, testing, packaging, roadmap, and template integration.
@@ -37,6 +40,7 @@ All notable changes to this project are documented in this file.
 
 ### Changed
 
+- `docs/api.md` now documents the live `LabCircuit` wrapper behavior instead of describing the circuit entrypoint as a future stub.
 - The placeholder `TemplateMetadata` top-level API has been retired in favor of the Graphix Lab public surface, and `docs/api.md` plus `examples/library_usage.py` now reflect the new domain-model-first contract.
 - The public API docs and regression tests now include the new `graphix_info()` runtime inspection entrypoint.
 - The root README and documentation index now frame the repository as Graphix Lab and point readers to the new project-specific planning docs instead of template-only guidance.

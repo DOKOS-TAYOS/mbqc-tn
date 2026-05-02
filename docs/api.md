@@ -2,8 +2,8 @@
 
 ## Public Python API
 
-Graphix Lab now exposes the initial public domain model and reserved entrypoints
-for the upcoming Graphix-backed wrappers.
+Graphix Lab now exposes its public domain model plus the first live Graphix
+wrapper entrypoints.
 
 ```python
 from graphix_lab import (
@@ -40,18 +40,43 @@ All of these are frozen dataclasses with typed fields so later prompts can build
 command summaries, traces, simulation reports, and backend comparisons on top
 of a stable contract.
 
-### Reserved wrapper entrypoints
+### Wrapper entrypoints
 
 ### `circuit(width: int) -> LabCircuit`
 
-Creates a lightweight `LabCircuit` placeholder object today. The Graphix-backed
-fluent builder behavior arrives in the next prompt without changing the import
-surface.
+Creates a `LabCircuit` fluent wrapper that delegates gate construction to
+`graphix.Circuit`.
+
+Supported methods in this prompt:
+
+- `.h(q)`
+- `.x(q)`
+- `.y(q)`
+- `.z(q)`
+- `.s(q)`
+- `.rx(q, angle, units="pi")`
+- `.ry(q, angle, units="pi")`
+- `.rz(q, angle, units="pi")`
+- `.cnot(control, target)`
+- `.compile()`
+- `.to_graphix()`
+
+Rotation angles are explicit:
+
+- `units="pi"` passes the numeric value through as Graphix Lab's public
+  pi-scaled convention.
+- `units="radians"` converts the numeric angle by dividing by `math.pi` before
+  delegating.
+- Any other unit raises a clear `ValueError`.
+
+`compile()` wraps `circuit.transpile().pattern` in `LabPattern`, and
+`to_graphix()` returns the wrapped Graphix circuit object.
 
 ### `from_graphix_pattern(pattern: object) -> LabPattern`
 
-Wraps a raw pattern object in a lightweight `LabPattern` placeholder. For this
-prompt, only `to_graphix()` is live; Graphix operations are still deferred.
+Wraps a raw Graphix pattern object in `LabPattern`. In this prompt,
+`to_graphix()` remains the only live pattern method; higher-level pattern
+operations arrive later.
 
 ### `from_qiskit(qc: object, *, angle_units: str = "radians") -> LabCircuit`
 

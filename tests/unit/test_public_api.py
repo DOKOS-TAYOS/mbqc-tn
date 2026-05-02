@@ -131,7 +131,7 @@ def test_public_api_domain_models_are_frozen_dataclasses() -> None:
     assert comparison.runs == (backend_run,)
 
 
-def test_public_api_exposes_lightweight_wrapper_stubs() -> None:
+def test_public_api_exposes_public_wrapper_types() -> None:
     lab_circuit = circuit(2)
     pattern = object()
     lab_pattern = from_graphix_pattern(pattern)

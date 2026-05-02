@@ -1,11 +1,11 @@
 # Status
 
-- Phase: Prompt 03 completed for domain models and the initial Graphix Lab public API; Graphix-backed circuit and pattern behavior is still deferred to later prompts
-- Last update: added frozen domain dataclasses for commands, summaries, traces, simulations, and backend comparisons; replaced the top-level placeholder metadata API with the Graphix Lab public surface; added lightweight `LabCircuit` and `LabPattern` stubs; and updated the API docs plus library example to match
-- Next step: Continue with `graphix_lab_vibe_template_codex_pack/prompts/04_lab_circuit_wrapper.md`
-- Blockers: Graphix is still not installed in the active `.venv`, so `graphix_info()` currently raises `GraphixUnavailableError` in this checkout until runtime dependencies are installed; the new wrapper entrypoints are intentionally stubs until Prompt 04 and Prompt 05; `THIRD_PARTY_LICENSES` also still reflects the pre-Graphix environment
-- Tests added: `tests/unit/test_public_api.py` now checks the exported Graphix Lab models, immutable report dataclasses, lightweight wrapper stubs, and the clear `from_qiskit` placeholder error; `tests/smoke/test_examples.py` now validates the updated library example output against the new public API
-- Quality command result: `bin\quality.cmd` passed with `ruff check . --fix`, `ruff format .`, `pytest`, and `pyright`; the first in-sandbox pytest run hit a Windows temp-directory permission boundary, but the full repo run passed once allowed to use the normal temp location
+- Phase: Prompt 04 completed for the live `LabCircuit` wrapper; higher-level `LabPattern` behavior beyond `to_graphix()` is still deferred to later prompts
+- Last update: implemented a fluent `LabCircuit` wrapper that lazily creates and delegates to `graphix.Circuit`, supports `h/x/y/z/s/rx/ry/rz/cnot`, compiles through `transpile().pattern` into `LabPattern`, added explicit `pi`/`radians` angle handling, and updated the API docs plus release notes to reflect the live circuit surface
+- Next step: Continue with `graphix_lab_vibe_template_codex_pack/prompts/05_lab_pattern_wrapper.md`
+- Blockers: Graphix is still not installed in the active `.venv`, so real runtime circuit operations still depend on a future dependency install in this checkout; `LabPattern` methods other than `to_graphix()` remain intentionally deferred until Prompt 05; `THIRD_PARTY_LICENSES` also still reflects the pre-Graphix environment
+- Tests added: `tests/unit/test_lab_circuit.py` now covers fluent gate chaining, explicit angle-unit conversion, `to_graphix()`, `compile()`, and unsupported unit errors against a fake Graphix runtime; `tests/unit/test_public_api.py` still checks the exported Graphix Lab models, wrapper types, and the clear `from_qiskit` placeholder error
+- Quality command result: `bin\quality.cmd` passed with `ruff check . --fix`, `ruff format .`, `pytest`, and `pyright`; the in-sandbox run still hit the known Windows temp-directory permission boundary for pytest fixtures, but the rerun outside the sandbox completed cleanly with `41 passed` and `0 errors`
 - License: MIT
 
 ## Checklist
