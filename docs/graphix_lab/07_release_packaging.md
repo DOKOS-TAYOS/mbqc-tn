@@ -62,6 +62,16 @@ python -m graphix_lab.cli licenses
 
 There is currently no dedicated `bin/licenses` wrapper in this repository.
 
+The command now ignores repo-local editable distributions that still point at
+this checkout, so stale aliases such as `project-name` do not leak into
+`THIRD_PARTY_LICENSES`. If one still appears, remove the stale editable install
+from the active `.venv` and regenerate the file.
+
+The generated inventory reflects the installed package metadata. If an upstream
+dependency does not publish license metadata in its distribution, the table may
+still show `UNKNOWN` even when the upstream project documents its license
+elsewhere.
+
 ## Release smoke checks
 
 Before tagging or publishing, confirm the editable install, package import, and

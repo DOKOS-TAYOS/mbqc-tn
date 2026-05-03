@@ -8,6 +8,7 @@
 - [Architecture](architecture.md)
 - [API overview](api.md)
 - [Troubleshooting](troubleshooting.md)
+- [Release and packaging notes](graphix_lab/07_release_packaging.md)
 
 ## AI Docs
 

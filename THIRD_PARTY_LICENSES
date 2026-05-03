@@ -22,7 +22,6 @@
 | packaging         | 26.2        | Apache-2.0 OR BSD-2-Clause                         | https://github.com/pypa/packaging               |
 | pillow            | 12.2.0      | MIT-CMU                                            | https://python-pillow.github.io                 |
 | pluggy            | 1.6.0       | MIT License                                        | UNKNOWN                                         |
-| project-name      | 0.0.0       | MIT                                                | UNKNOWN                                         |
 | psutil            | 7.2.2       | BSD-3-Clause                                       | https://github.com/giampaolo/psutil             |
 | pyparsing         | 3.3.2       | MIT                                                | https://github.com/pyparsing/pyparsing/         |
 | pyright           | 1.1.409     | MIT                                                | https://github.com/RobertCraigie/pyright-python |

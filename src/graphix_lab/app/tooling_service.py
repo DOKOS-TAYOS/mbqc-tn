@@ -1,10 +1,15 @@
 from __future__ import annotations
 
+import json
+import os
 import subprocess
 import sys
 import tomllib
 from dataclasses import dataclass
+from importlib import metadata
 from pathlib import Path
+from urllib.parse import unquote, urlparse
+from urllib.request import url2pathname
 
 
 @dataclass(frozen=True, slots=True)
@@ -87,7 +92,82 @@ def load_package_name(project_root: Path) -> str:
     return "graphix_lab"
 
 
-def build_license_command(output_file: Path, distribution_name: str) -> list[str]:
+def _normalize_path_for_comparison(path: Path) -> str:
+    return os.path.normcase(str(path.resolve()))
+
+
+def _path_from_file_url(file_url: str) -> Path | None:
+    parsed_url = urlparse(file_url)
+    if parsed_url.scheme != "file":
+        return None
+
+    raw_path = parsed_url.path
+    if parsed_url.netloc:
+        raw_path = f"//{parsed_url.netloc}{parsed_url.path}"
+
+    return Path(url2pathname(unquote(raw_path)))
+
+
+def _distribution_points_to_project_root(
+    direct_url_text: str,
+    normalized_project_root: str,
+) -> bool:
+    try:
+        direct_url_data = json.loads(direct_url_text)
+    except json.JSONDecodeError:
+        return False
+
+    dir_info = direct_url_data.get("dir_info")
+    if not isinstance(dir_info, dict) or dir_info.get("editable") is not True:
+        return False
+
+    distribution_url = direct_url_data.get("url")
+    if not isinstance(distribution_url, str):
+        return False
+
+    distribution_path = _path_from_file_url(distribution_url)
+    if distribution_path is None:
+        return False
+
+    return _normalize_path_for_comparison(distribution_path) == normalized_project_root
+
+
+def _repo_local_editable_distribution_names(
+    project_root: Path,
+    distribution_name: str,
+) -> list[str]:
+    ignored_names = {distribution_name}
+    normalized_project_root = _normalize_path_for_comparison(project_root)
+
+    for distribution in metadata.distributions():
+        try:
+            direct_url_text = distribution.read_text("direct_url.json")
+        except FileNotFoundError:
+            direct_url_text = None
+
+        if not direct_url_text or not _distribution_points_to_project_root(
+            direct_url_text,
+            normalized_project_root,
+        ):
+            continue
+
+        editable_name = distribution.metadata["Name"]
+        if isinstance(editable_name, str) and editable_name.strip():
+            ignored_names.add(editable_name.strip())
+
+    return sorted(ignored_names)
+
+
+def build_license_command(
+    output_file: Path,
+    project_root: Path,
+    distribution_name: str,
+) -> list[str]:
+    ignored_packages = _repo_local_editable_distribution_names(
+        project_root=project_root,
+        distribution_name=distribution_name,
+    )
+
     return [
         sys.executable,
         "-m",
@@ -97,7 +177,7 @@ def build_license_command(output_file: Path, distribution_name: str) -> list[str
         "--format=markdown",
         "--with-urls",
         "--ignore-packages",
-        distribution_name,
+        *ignored_packages,
         "--output-file",
         str(output_file),
     ]

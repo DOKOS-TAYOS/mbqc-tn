@@ -51,6 +51,8 @@ All notable changes to this project are documented in this file.
 
 ### Fixed
 
+- `python -m graphix_lab.cli licenses` now ignores any repo-local editable distribution aliases that still point at this checkout, so stale installs such as `project-name` no longer leak into `THIRD_PARTY_LICENSES`.
+- The CLI help text, release-packaging notes, troubleshooting guide, and root documentation index now describe Graphix Lab explicitly and explain the third-party license inventory workflow more clearly.
 - `graphix_lab.cli` now exposes a local Windows-argument-splitting seam for tests instead of forcing them to monkeypatch the global `os.name`, and it keeps using the host platform's real concrete `pathlib` class for working-directory and output-path handling so Ubuntu `pytest` runs no longer crash while simulating Windows-style programmatic CLI strings.
 - The shared `temp_dir` test fixture no longer depends on `pytest`'s own temporary-directory factory; it now probes the system temp root first and falls back to a repo-local `pytest-temp/` workspace only when the full create/write/delete cycle is not usable in the active environment.
 - Bootstrap integration tests now ignore unreadable local artifact directories while copying the repository into a temporary workspace, which keeps unrelated local probes from breaking the bootstrap regression suite.

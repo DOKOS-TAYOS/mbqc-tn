@@ -69,6 +69,7 @@ def test_release_smoke_commands_use_the_requested_package_name() -> None:
 def test_license_command_generates_compact_inventory() -> None:
     command = build_license_command(
         output_file=Path("THIRD_PARTY_LICENSES"),
+        project_root=Path("workspace"),
         distribution_name="graphix-lab",
     )
 
@@ -82,6 +83,56 @@ def test_license_command_generates_compact_inventory() -> None:
         "--with-urls",
         "--ignore-packages",
         "graphix-lab",
+        "--output-file",
+        "THIRD_PARTY_LICENSES",
+    ]
+
+
+def test_license_command_ignores_repo_local_editable_aliases(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    workspace_root = _repo_local_workspace("tooling-license-command")
+
+    class FakeDistribution:
+        def __init__(self, name: str, direct_url_text: str | None) -> None:
+            self.metadata = {"Name": name}
+            self._direct_url_text = direct_url_text
+
+        def read_text(self, filename: str) -> str | None:
+            assert filename == "direct_url.json"
+            return self._direct_url_text
+
+    project_url = f'{{"dir_info": {{"editable": true}}, "url": "{workspace_root.as_uri()}"}}'
+    other_url = '{"dir_info": {"editable": true}, "url": "file:///tmp/other-project"}'
+
+    monkeypatch.setattr(
+        tooling_service.metadata,
+        "distributions",
+        lambda: [
+            FakeDistribution("graphix-lab", project_url),
+            FakeDistribution("project-name", project_url),
+            FakeDistribution("other-project", other_url),
+            FakeDistribution("no-direct-url", None),
+        ],
+    )
+
+    command = build_license_command(
+        output_file=Path("THIRD_PARTY_LICENSES"),
+        project_root=workspace_root,
+        distribution_name="graphix-lab",
+    )
+
+    assert command == [
+        sys.executable,
+        "-m",
+        "piplicenses",
+        "--python",
+        sys.executable,
+        "--format=markdown",
+        "--with-urls",
+        "--ignore-packages",
+        "graphix-lab",
+        "project-name",
         "--output-file",
         "THIRD_PARTY_LICENSES",
     ]

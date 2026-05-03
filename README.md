@@ -89,6 +89,19 @@ print(report)
 The wrappers in `bin/` stay useful because they prefer the local `.venv`
 interpreter and keep the quality flow consistent across Windows and Linux/macOS.
 
+## License
+
+Graphix Lab is distributed under the MIT License. See `LICENSE` for the project
+license text.
+
+`THIRD_PARTY_LICENSES` tracks the runtime dependency licenses from the active
+`.venv`. Regenerate it with `python scripts/run_template_command.py licenses`
+after dependency changes. The license command now ignores repo-local editable
+aliases that still point at this checkout, so stale template installs do not
+pollute the inventory. The generated table is metadata-based, so a dependency
+may still show `UNKNOWN` when the installed package does not publish license
+metadata in its distribution.
+
 ## Project Documentation
 
 - [Documentation index](docs/README.md)
@@ -97,6 +110,7 @@ interpreter and keep the quality flow consistent across Windows and Linux/macOS.
 - [Developer guide](docs/guide.md)
 - [Architecture](docs/architecture.md)
 - [API overview](docs/api.md)
+- [Release and packaging notes](docs/graphix_lab/07_release_packaging.md)
 - [AI user guide](docs/docs_for_ai/guide_for_ai_users.md)
 - [AI project instructions](docs/docs_for_ai/project_ai_instructions.md)
 - [AI status board](docs/docs_for_ai/status.md)

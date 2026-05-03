@@ -47,10 +47,16 @@ def test_main_strips_windows_quotes_from_programmatic_string_arguments(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     captured_output_path: Path | None = None
+    captured_project_root: Path | None = None
 
-    def fake_build_license_command(output_file: Path, distribution_name: str) -> list[str]:
-        nonlocal captured_output_path
+    def fake_build_license_command(
+        output_file: Path,
+        project_root: Path,
+        distribution_name: str,
+    ) -> list[str]:
+        nonlocal captured_output_path, captured_project_root
         captured_output_path = output_file
+        captured_project_root = project_root
         assert distribution_name == "graphix-lab"
         return ["fake-license-command"]
 
@@ -72,3 +78,4 @@ def test_main_strips_windows_quotes_from_programmatic_string_arguments(
 
     assert cli_module.main('licenses --output "THIRD PARTY.md"') == 0
     assert captured_output_path == Path("THIRD PARTY.md")
+    assert captured_project_root == Path.cwd()

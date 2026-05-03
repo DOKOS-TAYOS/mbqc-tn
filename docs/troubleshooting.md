@@ -30,6 +30,18 @@ python -m pip install -e .[dev]
 The command only lists third-party packages from the active interpreter. If the
 output looks wrong, confirm that you are using the intended `.venv`.
 
+## `THIRD_PARTY_LICENSES` Shows `project-name` Or Another Local Alias
+
+That means the active `.venv` still has an older editable install pointing at
+this same repository. Recent `licenses` runs ignore repo-local editable aliases
+automatically, but you can also clean up the environment and regenerate the
+inventory:
+
+```bash
+python -m pip uninstall project-name
+python scripts/run_template_command.py licenses
+```
+
 ## `quality` Fails On Pyright
 
 - check that `.venv` exists

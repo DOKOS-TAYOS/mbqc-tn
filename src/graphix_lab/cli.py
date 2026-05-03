@@ -49,13 +49,15 @@ def main(argv: str | Sequence[str] | None = None) -> int:
 
 def _build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
-        description="Project template CLI for Python vibe coding projects."
+        description=(
+            "Graphix Lab CLI for quality checks, cleanup, licensing, and template bootstrap."
+        )
     )
     subparsers = parser.add_subparsers(dest="command")
 
     bootstrap_parser = subparsers.add_parser(
         "bootstrap",
-        help="Configure template metadata and rename the package.",
+        help="Configure a fresh template copy and rename the package.",
     )
     bootstrap_parser.add_argument("--project-title")
     bootstrap_parser.add_argument("--distribution-name")
@@ -82,7 +84,7 @@ def _build_parser() -> argparse.ArgumentParser:
 
     licenses_parser = subparsers.add_parser(
         "licenses",
-        help="Regenerate THIRD_PARTY_LICENSES with pip-licenses.",
+        help="Regenerate THIRD_PARTY_LICENSES from the active interpreter.",
     )
     licenses_parser.add_argument("--output", default="THIRD_PARTY_LICENSES")
     return parser
@@ -207,7 +209,11 @@ def _handle_licenses(args: argparse.Namespace) -> int:
     project_root = _current_working_directory()
     distribution_name = load_distribution_name(project_root)
     completed_process = subprocess.run(
-        build_license_command(_path_from_cli_value(args.output), distribution_name),
+        build_license_command(
+            output_file=_path_from_cli_value(args.output),
+            project_root=project_root,
+            distribution_name=distribution_name,
+        ),
         check=False,
         cwd=project_root,
     )
