@@ -65,7 +65,7 @@ def test_main_strips_windows_quotes_from_programmatic_string_arguments(
         assert cwd == Path.cwd()
         return CompletedProcess(args=command, returncode=0)
 
-    monkeypatch.setattr(cli_module.os, "name", "nt", raising=False)
+    monkeypatch.setattr(cli_module, "_uses_windows_argument_splitting", lambda: True)
     monkeypatch.setattr(cli_module, "load_distribution_name", lambda _project_root: "graphix-lab")
     monkeypatch.setattr(cli_module, "build_license_command", fake_build_license_command)
     monkeypatch.setattr(cli_module.subprocess, "run", cast(object, fake_subprocess_run))

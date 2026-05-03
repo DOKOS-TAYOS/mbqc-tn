@@ -96,8 +96,12 @@ def _normalize_argv(argv: str | Sequence[str] | None) -> list[str] | None:
     return list(argv)
 
 
+def _uses_windows_argument_splitting() -> bool:
+    return os.name == "nt"
+
+
 def _split_command_string(command_line: str) -> list[str]:
-    if os.name == "nt":
+    if _uses_windows_argument_splitting():
         return [_strip_wrapping_quotes(token) for token in shlex.split(command_line, posix=False)]
     return shlex.split(command_line, posix=True)
 
