@@ -1,94 +1,92 @@
 # Architecture
 
-This project inherits the template's library-first architecture.
+Graphix Lab keeps a library-first shape, with the public Python API as the main
+product and the CLI as a thin helper layer.
 
-## Package layout
-
-After bootstrap, the package is `graphix_lab`.
-
-Recommended layout:
+## Current Package Layout
 
 ```text
 src/graphix_lab/
   __init__.py
+  public_api.py
   cli.py
   domain/
     commands.py
+    errors.py
+    simulation.py
     summaries.py
     traces.py
-    simulation.py
-    errors.py
   app/
+    bootstrap_service.py
     circuit_service.py
+    clean_service.py
     pattern_service.py
-    summary_service.py
     simulation_service.py
-    trace_service.py
-    comparison_service.py
+    summary_service.py
+    tooling_service.py
+    visualization_service.py
   infrastructure/
     graphix_adapter.py
     graphix_capabilities.py
+    graphix_runtime.py
     qiskit_adapter.py
-    plotting.py
-    graph_layout.py
+    text_files.py
 ```
 
-## Layers
+## Layer Responsibilities
 
 ### Domain
 
-Stable, typed, mostly immutable data structures. Domain objects should not import heavy optional dependencies unless unavoidable.
+Stable, typed data structures and domain errors.
 
 Examples:
 
 - `CommandRecord`
-- `CommandKind`
 - `PatternSummary`
 - `ResourceSummary`
 - `TraceFrame`
 - `RunTrace`
 - `SimulationReport`
+- `BackendRunReport`
 - `BackendComparisonReport`
 
 ### App
 
-Orchestrates workflows while staying independent from presentation details.
+Small orchestration services used by the public API and CLI.
 
 Examples:
 
-- compile a `LabCircuit` into a `LabPattern`
-- standardize or shift signals
-- build command tables
-- run simulations through Graphix
-- build trace frames
-- compare backends
+- build or compile a `LabCircuit`
+- mutate or copy a wrapped Graphix pattern
+- derive summaries from normalized commands
+- run simulations or backend comparisons
+- build figures and trace-slider handles
 
 ### Infrastructure
 
-Adapters to external libraries and runtime details.
+Adapters for Graphix, optional Qiskit, and a few repo/tooling details.
 
 Examples:
 
-- Graphix version/capability detection
-- Graphix command extraction
+- Graphix runtime and capability detection
+- Graphix command normalization
 - Qiskit `QuantumCircuit` translation
-- Matplotlib plotting
-- NetworkX graph layout
+- text-file helpers used by the CLI/tooling path
 
-### CLI
+### Public API And CLI
 
-The CLI should remain thin. It may expose commands such as `info`, `examples`, or `inspect`, but the core product is the library API.
+- `public_api.py` exposes the small educational library surface.
+- `cli.py` stays thin and delegates real work to services.
 
-## Dependency direction
+## Dependency Direction
 
 ```text
-cli -> app -> domain
-app -> infrastructure -> external libraries
+cli -> app
+public_api -> app
+public_api -> domain
+public_api -> infrastructure
+app -> infrastructure
 infrastructure -> domain
 ```
 
-Domain must not import app or infrastructure.
-
-## Public API
-
-The public API should live in `src/graphix_lab/__init__.py` and stay small. Avoid exposing every internal service.
+Domain code should stay free of Graphix and Qiskit runtime imports.

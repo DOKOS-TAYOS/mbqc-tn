@@ -1,8 +1,8 @@
 # Quick Start
 
-Use this document only for the first start of a new project created from the template.
+Use this guide for the current Graphix Lab repository.
 
-## 1. Create the Environment and Install the Template
+## 1. Create the Environment and Install
 
 Windows PowerShell:
 
@@ -22,23 +22,35 @@ python -m pip install --upgrade pip
 python -m pip install -e .[dev]
 ```
 
-## 2. Bootstrap the Project Identity
+If you want the optional Qiskit example too, use:
+
+```bash
+python -m pip install -e .[qiskit,dev]
+```
+
+## 2. Run a Couple of Examples
 
 Windows PowerShell:
 
 ```powershell
-bin\bootstrap.cmd
+.venv\Scripts\python.exe examples\one_qubit_rotation.py
+.venv\Scripts\python.exe examples\backend_comparison.py
 ```
 
 Linux or macOS:
 
 ```bash
-./bin/bootstrap.sh
+.venv/bin/python examples/one_qubit_rotation.py
+.venv/bin/python examples/backend_comparison.py
 ```
 
-Bootstrap asks for the project identity fields and then runs `pip install -e .[dev]` again automatically so the renamed package is ready without extra manual steps. Run it only once per fresh copy of the template.
+Optional example:
 
-## 3. Verify the Base
+- `examples/trace_slider.py` opens a Matplotlib-backed trace viewer.
+- `examples/qiskit_import.py` prints a friendly message when `qiskit` is not
+  installed yet.
+
+## 3. Run the Quality Flow
 
 Windows PowerShell:
 
@@ -52,9 +64,11 @@ Linux or macOS:
 ./bin/quality.sh
 ```
 
-## 4. Start Building
+## 4. Keep the Environment Fresh
 
-- keep the public API minimal
-- add tests before behavior changes
-- update `CHANGELOG.md`
-- update `docs/docs_for_ai/status.md`
+- If you edit `pyproject.toml`, rerun `python -m pip install -e .[dev]`
+  inside `.venv`.
+- If dependency changes affect third-party packages, regenerate
+  `THIRD_PARTY_LICENSES` with `python scripts/run_template_command.py licenses`.
+- When you change public behavior, update `CHANGELOG.md` and
+  `docs/docs_for_ai/status.md`.

@@ -1,31 +1,32 @@
-# Visualization and trace specification
+# Visualization And Trace Specification
 
 ## Goals
 
-Visualization should help users understand an MBQC pattern. It does not need to expose internal tensor data.
+Visualization should help users understand an MBQC pattern without exposing
+internal tensor data.
 
-## Static visualization
+## Static Visualization
 
-Use Matplotlib and NetworkX. Return the created `matplotlib.figure.Figure` so callers can save or customize it.
+`LabPattern.draw(...)` currently returns a headless-safe
+`matplotlib.figure.Figure`.
 
-Recommended visual encodings:
+The local renderer builds its graph from normalized `CommandRecord` objects and
+can highlight:
 
-- input nodes
-- output nodes
+- input and output nodes
 - measured nodes
-- pending nodes
-- current command node
-- entanglement edges
-- correction dependencies
-- optional flow/gflow arrows if Graphix exposes them
+- entanglement edges from `E` commands
+- dependency arrows from `s_domain`, `t_domain`, and explicit `X` / `Z`
+  correction domains
+- optional flow overlays when the wrapped Graphix pattern exposes extractable
+  flow or gflow data
 
-## Graphix visualization fallback
+`delegate_to_graphix=True` is an explicit opt-in when callers want to try
+Graphix's own `draw_graph()` path first.
 
-If Graphix provides a drawing method such as `draw_graph`, `draw_flow`, or `draw_xzcorrections`, Graphix Lab may delegate to it. If unavailable, it should fall back to a NetworkX graph built from command records.
+## Trace Model
 
-## Trace model
-
-A syntactic trace is sufficient for MVP.
+A lightweight syntactic trace is enough for the MVP.
 
 ```python
 @dataclass(frozen=True, slots=True)
@@ -48,16 +49,24 @@ class RunTrace:
     frames: tuple[TraceFrame, ...]
 ```
 
-## Slider animation
+Each frame describes the state immediately after its command.
 
-Use `matplotlib.widgets.Slider` for interactive inspection.
+## Slider Animation
+
+`LabPattern.animate(...)` currently returns `TraceAnimationHandle`.
+
+That handle keeps the figure, graph axes, slider axes, slider widget,
+description text, generated trace, and update callback alive so interactive
+Matplotlib state is not lost.
+
+The current script example is `examples/trace_slider.py`.
 
 The animation helper should:
 
 - create a static figure
-- update node/edge labels when the slider changes
-- not require Jupyter-specific APIs
-- work in normal Matplotlib backends when possible
+- update the title and description when the slider changes
+- highlight the current command node or nodes
+- restyle measured versus pending nodes
+- avoid Jupyter-specific APIs
+- stay compatible with headless test runs
 - degrade gracefully when no graph can be extracted
-
-Return a small handle object that keeps references to the figure, axes, slider, and callback state to avoid garbage collection.

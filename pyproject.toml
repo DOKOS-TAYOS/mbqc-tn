@@ -10,18 +10,32 @@ readme = "README.md"
 requires-python = ">=3.11"
 license = { text = "MIT" }
 authors = [{ name = "Alejandro Mata Ali" }]
-keywords = ["python", "template", "vibe-coding", "software"]
+keywords = [
+    "graphix",
+    "graphix-lab",
+    "mbqc",
+    "measurement-based-quantum-computing",
+    "quantum-computing",
+]
 classifiers = [
     "Development Status :: 2 - Pre-Alpha",
+    "Environment :: Console",
     "Intended Audience :: Developers",
+    "Intended Audience :: Education",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
     "Programming Language :: Python",
     "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
+    "Topic :: Education",
+    "Topic :: Scientific/Engineering :: Physics",
     "Typing :: Typed",
 ]
+
 dependencies = [
     "graphix>=0.3.5,<0.4",
     "matplotlib>=3.8",
@@ -42,11 +56,16 @@ dev = [
 [project.scripts]
 graphix-lab = "graphix_lab.cli:main"
 
+[project.urls]
+Homepage = "https://github.com/DOKOS-TAYOS/mbqc-tn"
+Repository = "https://github.com/DOKOS-TAYOS/mbqc-tn"
+Issues = "https://github.com/DOKOS-TAYOS/mbqc-tn/issues"
+
 [tool.hatch.build.targets.wheel]
 packages = ["src/graphix_lab"]
 
 [tool.pytest.ini_options]
-addopts = "-ra --strict-markers"
+addopts = "-ra --strict-markers -p no:cacheprovider"
 pythonpath = ["src"]
 testpaths = ["tests"]
 
@@ -61,6 +80,7 @@ extend-exclude = [
     ".pytest_cache",
     ".ruff_cache",
     "build",
+    "codex-pytest-tmp",
     "dist",
     "htmlcov",
     "pytest-cache",

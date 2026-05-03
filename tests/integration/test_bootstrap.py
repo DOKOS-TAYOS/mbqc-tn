@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import os
 import re
 import shutil
 import tomllib
@@ -73,12 +74,37 @@ def _restore_template_metadata_scope_summary(content: str) -> str:
 
 def _copy_template_workspace(source_root: Path, workspace: Path) -> None:
     bootstrap_ignored_patterns = (*SKIP_DIRECTORIES, *SKIP_DIRECTORY_GLOBS)
+
+    def ignore_inaccessible_entries(source: str, names: list[str]) -> set[str]:
+        ignored_names = set(shutil.ignore_patterns(*bootstrap_ignored_patterns)(source, names))
+        source_path = Path(source)
+
+        for name in names:
+            if name in ignored_names:
+                continue
+            if not _path_is_copyable(source_path / name):
+                ignored_names.add(name)
+
+        return ignored_names
+
     shutil.copytree(
         source_root,
         workspace,
-        ignore=shutil.ignore_patterns(*bootstrap_ignored_patterns),
+        ignore=ignore_inaccessible_entries,
     )
     _restore_public_template_state(workspace)
+
+
+def _path_is_copyable(path: Path) -> bool:
+    try:
+        if path.is_dir():
+            with os.scandir(path):
+                return True
+        with path.open("rb"):
+            return True
+    except OSError:
+        return False
+    return True
 
 
 def _load_vibe_template_data(workspace: Path) -> dict[str, object]:

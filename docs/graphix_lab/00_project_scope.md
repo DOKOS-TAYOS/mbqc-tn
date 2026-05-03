@@ -1,51 +1,47 @@
-# Project scope
+# Project Scope
 
 ## Mission
 
-Graphix Lab makes Graphix easier to use for learning, teaching, debugging, and small-to-medium MBQC experimentation.
+Graphix Lab makes Graphix easier to use for learning, teaching, debugging, and
+small-to-medium MBQC experimentation.
 
-The project should let a user write code like:
+The current public flow is intentionally small:
 
 ```python
 from graphix_lab import circuit
 
-lab = (
-    circuit(2)
-    .h(0)
-    .cnot(0, 1)
-    .compile()
-    .standardize()
-    .shift_signals()
-)
+pattern = circuit(2).h(0).cnot(0, 1).compile().standardize()
 
-print(lab.summary())
-lab.draw()
-result = lab.run(backend="statevector", seed=123, trace=True)
-result.trace.animate()
+print(pattern.summary())
+print(pattern.explain())
+
+report = pattern.compare_backends(backends=("statevector",))
+print(report)
 ```
 
-## In scope for MVP
+## In Scope For The MVP
 
-- Small public Python API.
-- Wrappers around Graphix `Circuit` and `Pattern` objects.
-- Graphix capability/version adapter.
-- Command introspection into stable `CommandRecord` objects.
-- Pattern summaries and resource estimates.
-- Graphix-delegated simulation runner for supported backends.
-- Syntactic execution trace of commands.
-- Static graph visualization with Matplotlib and NetworkX.
-- Slider-based trace visualization with `matplotlib.widgets.Slider`.
-- Examples and tests.
+- Small public Python API
+- Wrappers around Graphix `Circuit` and `Pattern` objects
+- Graphix capability and backend detection
+- Command introspection into stable `CommandRecord` objects
+- Pattern summaries and resource estimates
+- Graphix-delegated simulation and backend comparison
+- Syntactic execution traces
+- Static graph visualization with Matplotlib and NetworkX
+- Slider-based trace visualization with `matplotlib.widgets.Slider`
+- Script examples under `examples/`
 
-## Out of scope for MVP
+## Out Of Scope For The MVP
 
-- Implementing a new MBQC compiler.
-- Implementing a new tensor-network simulator.
-- GPU, MPI, CUDA-Q, cuQuantum, or distributed execution.
-- Full Qiskit feature parity.
-- Full symbolic pattern support beyond what Graphix already exposes.
-- Heavy GUI frameworks.
+- Implementing a new MBQC compiler
+- Implementing a new tensor-network simulator
+- GPU, MPI, CUDA-Q, cuQuantum, or distributed execution
+- Full Qiskit feature parity
+- Heavy GUI frameworks
+- Notebook-first workflows before the script examples are stable
 
-## Design principle
+## Design Principle
 
-When Graphix already does something, delegate to Graphix. Graphix Lab should add clarity, diagnostics, affordances, and educational presentation.
+When Graphix already does something, Graphix Lab should delegate to it and add
+clarity, diagnostics, and educational presentation around it.

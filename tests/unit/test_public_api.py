@@ -22,6 +22,7 @@ from graphix_lab import (
     graphix_info,
 )
 from graphix_lab import __all__ as public_names
+from graphix_lab.domain.errors import OptionalDependencyError
 
 
 def test_public_api_exports_graphix_lab_models_and_entrypoints() -> None:
@@ -37,6 +38,7 @@ def test_public_api_exports_graphix_lab_models_and_entrypoints() -> None:
         "ResourceSummary",
         "RunTrace",
         "SimulationReport",
+        "TraceAnimationHandle",
         "TraceFrame",
         "circuit",
         "from_graphix_pattern",
@@ -129,6 +131,8 @@ def test_public_api_domain_models_are_frozen_dataclasses() -> None:
 
     assert "PatternSummary" in str(summary)
     assert comparison.runs == (backend_run,)
+    assert "backend" in str(comparison).lower()
+    assert "statevector" in str(comparison)
 
 
 def test_public_api_exposes_public_wrapper_types() -> None:
@@ -142,6 +146,15 @@ def test_public_api_exposes_public_wrapper_types() -> None:
     assert lab_pattern.to_graphix() is pattern
 
 
-def test_from_qiskit_stub_raises_clear_not_implemented_error() -> None:
-    with pytest.raises(NotImplementedError, match="from_qiskit"):
+def test_from_qiskit_raises_clear_optional_dependency_error_when_qiskit_is_missing(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    import graphix_lab.infrastructure.qiskit_adapter as qiskit_adapter_module
+
+    def fake_import_module(module_name: str) -> object:
+        raise ModuleNotFoundError(name=module_name)
+
+    monkeypatch.setattr(qiskit_adapter_module, "import_module", fake_import_module)
+
+    with pytest.raises(OptionalDependencyError, match="qiskit"):
         from_qiskit(object())

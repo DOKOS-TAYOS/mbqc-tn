@@ -1,21 +1,23 @@
-# Qiskit frontend
+# Qiskit Frontend
 
-The Qiskit frontend is optional and should not be required for installing the core library.
+The Qiskit frontend is optional and is not required for the core library.
 
 ## Dependency
-
-Add Qiskit under an optional extra, for example:
 
 ```toml
 [project.optional-dependencies]
 qiskit = ["qiskit>=2,<3"]
 ```
 
-The exact lower bound can be adjusted after tests against the installed Qiskit version.
+Install it in the active `.venv` when needed:
 
-## Gate subset for first implementation
+```bash
+python -m pip install -e .[qiskit,dev]
+```
 
-Support only a small, explicit subset:
+## Supported Gate Subset
+
+The current adapter supports only:
 
 - `h`
 - `x`
@@ -27,22 +29,34 @@ Support only a small, explicit subset:
 - `rz`
 - `cx` / `cnot`
 
-Unsupported instructions should raise `UnsupportedGateError` with the gate name and index.
+Unsupported instructions raise `UnsupportedGateError` with the gate name and
+zero-based instruction index.
 
-## Angle units
+## Angle Units
 
-Qiskit rotation gates use radians. Graphix rotation methods use angles in units of π. The adapter should convert:
+Qiskit rotation gates use radians. Graphix Lab converts them into Graphix's pi
+units with:
 
 ```python
 angle_pi_units = angle_radians / math.pi
 ```
 
-Allow `angle_units="pi"` for advanced users who already provide Graphix-style units.
+Advanced users may pass `angle_units="pi"` when their source parameters are
+already expressed that way.
 
-## Bit and qubit ordering
+## Qubit Ordering
 
-Qiskit and Graphix conventions may differ. The adapter should document the chosen convention and test it on small circuits.
+Imported qubit indices come from `QuantumCircuit.find_bit(qubit).index` and are
+reused directly as `LabCircuit` node indices.
+
+Measurement and classical-register semantics remain out of scope for the
+current adapter.
+
+## Example
+
+`examples/qiskit_import.py` demonstrates the frontend and prints a friendly
+message when `qiskit` is not installed yet.
 
 ## Testing
 
-All Qiskit tests should be skipped when Qiskit is not installed.
+Real Qiskit tests should continue to use `pytest.importorskip("qiskit")`.

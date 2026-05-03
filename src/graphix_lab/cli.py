@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import argparse
+import os
+import shlex
 import subprocess
 from collections.abc import Sequence
 from pathlib import Path
@@ -24,9 +26,9 @@ from .app.tooling_service import (
 )
 
 
-def main(argv: Sequence[str] | None = None) -> int:
+def main(argv: str | Sequence[str] | None = None) -> int:
     parser = _build_parser()
-    args = parser.parse_args(list(argv) if argv is not None else None)
+    args = parser.parse_args(_normalize_argv(argv))
 
     if args.command == "bootstrap":
         return _handle_bootstrap(args)
@@ -61,7 +63,10 @@ def _build_parser() -> argparse.ArgumentParser:
     bootstrap_parser.add_argument("--license-id", choices=SUPPORTED_LICENSE_IDS)
     bootstrap_parser.add_argument("--dry-run", action="store_true")
 
-    quality_parser = subparsers.add_parser("quality", help="Run Ruff, pytest, and pyright.")
+    quality_parser = subparsers.add_parser(
+        "quality",
+        help="Run Ruff, package import and CLI smoke checks, pytest, and pyright.",
+    )
     quality_parser.add_argument("--check-only", action="store_true")
 
     subparsers.add_parser("test", help="Run pytest.")
@@ -78,6 +83,26 @@ def _build_parser() -> argparse.ArgumentParser:
     )
     licenses_parser.add_argument("--output", default="THIRD_PARTY_LICENSES")
     return parser
+
+
+def _normalize_argv(argv: str | Sequence[str] | None) -> list[str] | None:
+    if argv is None:
+        return None
+    if isinstance(argv, str):
+        return _split_command_string(argv)
+    return list(argv)
+
+
+def _split_command_string(command_line: str) -> list[str]:
+    if os.name == "nt":
+        return [_strip_wrapping_quotes(token) for token in shlex.split(command_line, posix=False)]
+    return shlex.split(command_line, posix=True)
+
+
+def _strip_wrapping_quotes(token: str) -> str:
+    if len(token) >= 2 and token[0] == token[-1] and token[0] in {'"', "'"}:
+        return token[1:-1]
+    return token
 
 
 def _handle_bootstrap(args: argparse.Namespace) -> int:
@@ -125,8 +150,12 @@ def _handle_bootstrap(args: argparse.Namespace) -> int:
 
 
 def _handle_quality(args: argparse.Namespace) -> int:
-    commands = build_quality_commands(include_format_fix=not args.check_only)
-    results = run_commands(commands, root=Path.cwd())
+    project_root = Path.cwd()
+    commands = build_quality_commands(
+        project_root=project_root,
+        include_format_fix=not args.check_only,
+    )
+    results = run_commands(commands, root=project_root)
     for result in results:
         print(f"{' '.join(result.command)} -> {result.returncode}")
         if result.returncode != 0:

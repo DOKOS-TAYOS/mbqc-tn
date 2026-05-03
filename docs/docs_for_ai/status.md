@@ -1,11 +1,11 @@
 # Status
 
-- Phase: Prompt 06 completed for Graphix command introspection; summaries, execution, tracing, and visualization behavior remain deferred to later prompts
-- Last update: implemented `LabPattern.commands()` on top of a defensive Graphix adapter that iterates compiled patterns, normalizes known `N`/`E`/`M`/`X`/`Z`/`C` commands into stable `CommandRecord` objects, extracts measurement plane and angle from either direct command attributes or nested measurement objects, and falls back to `kind="UNKNOWN"` plus raw `repr` output for unrecognized command objects
-- Next step: Continue with `graphix_lab_vibe_template_codex_pack/prompts/07_summary_explain_resources.md`
-- Blockers: Graphix is still not installed in the active `.venv`, so real runtime pattern operations still depend on a future dependency install in this checkout; `summary()`, `explain()`, `resources()`, `run()`, `trace()`, `draw()`, `animate()`, and `compare_backends()` remain intentionally deferred to later prompts; `THIRD_PARTY_LICENSES` also still reflects the pre-Graphix environment
-- Tests added: `tests/unit/test_lab_pattern.py` now covers one-qubit and two-qubit compiled-pattern command normalization plus the unknown-command fallback, while the existing `tests/unit/test_lab_circuit.py` and `tests/unit/test_public_api.py` regression coverage still guards the `LabCircuit -> LabPattern` handoff and exported wrapper surface
-- Quality command result: `bin\quality.cmd` passed with `ruff check . --fix`, `ruff format .`, `pytest`, and `pyright`; the in-sandbox run still hit the known Windows temp-directory permission boundary for pytest temp workspaces, but the rerun outside the sandbox completed cleanly with `48 passed` and `0 pyright errors`
+- Phase: Prompt 16 implemented for review hardening
+- Last update: the Prompt 16 review found and fixed a real Graphix compatibility bug where `Pattern.shift_signals()` mutates the pattern in place but returns an auxiliary signal-map `dict`; `LabPattern.shift_signals()` now keeps the wrapper bound to the mutated Graphix pattern instead of replacing it with that dictionary, example smoke coverage now includes the extra `trace_animation`, `library_usage`, and `cli_usage` scripts, and the public docs now describe the real `shift_signals()` behavior
+- Next step: No later Codex-pack prompt remains after Prompt 16; move to manual MVP acceptance/release preparation, or write a new follow-up prompt only if you want post-MVP Graphix compatibility or UX refinements
+- Blockers: No blocker for the core MVP flow; the optional `qiskit` extra is still not installed in the active local `.venv`, so the real-Qiskit tests continue to skip locally and are expected to run through the isolated CI job instead
+- Tests added: `tests/unit/test_lab_pattern.py` now covers the real `shift_signals()` auxiliary-return shape, `tests/integration/test_graphix_runtime_integration.py` now verifies that real Graphix keeps command introspection after `shift_signals()`, and `tests/smoke/test_examples.py` now covers `examples/trace_animation.py`, `examples/library_usage.py`, and `examples/cli_usage.py`
+- Quality command result: On May 3, 2026, `bin\quality.cmd` again hit the known sandbox-only Windows temp-directory permission boundary during `pytest`, then passed cleanly outside the sandbox with `ruff check . --fix`, `ruff format .`, package-import smoke, CLI-help smoke, `pytest`, and `pyright`; the final outside-sandbox result was `100 passed`, `2 skipped` (missing optional Qiskit), and `0 pyright errors`
 - License: MIT
 
 ## Checklist
@@ -32,4 +32,13 @@
 - [x] Template metadata is no longer part of the public top-level API
 - [x] `LabPattern` now exposes live fluent wrapper methods around Graphix pattern mutation APIs
 - [x] `LabPattern.commands()` now exposes stable command introspection through `CommandRecord`
-- [ ] `THIRD_PARTY_LICENSES` regenerated after installing Graphix Lab runtime dependencies
+- [x] `LabPattern.trace()` now exposes a standalone conceptual `RunTrace`
+- [x] `LabPattern.draw()` now returns a headless-safe Matplotlib `Figure` with local command-record visualization plus optional Graphix delegation
+- [x] `LabPattern.animate()` now exposes headless-safe slider-based trace inspection through `TraceAnimationHandle`
+- [x] `LabPattern.compare_backends()` now exposes typed backend comparison reports with conservative default backend selection and per-backend failure capture
+- [x] `LabPattern.shift_signals()` now preserves the wrapped Graphix pattern when the runtime returns auxiliary signal-shift data
+- [x] `from_qiskit(...)` now imports the supported Qiskit gate subset with clear optional-dependency and unsupported-gate failures
+- [x] Script examples now cover the current public workflows and optional-Qiskit guidance path
+- [x] The extra example scripts now have smoke coverage and are listed in the user/AI guides
+- [x] The README and Graphix Lab docs now describe the live API and current repository workflow
+- [x] `THIRD_PARTY_LICENSES` regenerated after installing Graphix Lab runtime dependencies

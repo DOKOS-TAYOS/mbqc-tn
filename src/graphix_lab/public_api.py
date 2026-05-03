@@ -1,9 +1,13 @@
 from __future__ import annotations
 
+from collections.abc import Sequence
 from dataclasses import dataclass, field
-from typing import NoReturn
+
+from matplotlib.axes import Axes
+from matplotlib.figure import Figure
 
 from .app.circuit_service import (
+    _validate_positive_circuit_width,
     apply_cnot_gate,
     apply_rotation_gate,
     apply_single_qubit_gate,
@@ -11,16 +15,23 @@ from .app.circuit_service import (
     compile_graphix_circuit,
 )
 from .app.pattern_service import apply_graphix_pattern_method, copy_graphix_pattern
+from .app.simulation_service import (
+    compare_graphix_backends,
+    run_graphix_pattern,
+    trace_graphix_pattern,
+)
+from .app.summary_service import (
+    build_pattern_explanation,
+    build_pattern_summary,
+    build_resource_summary,
+)
+from .app.visualization_service import animate_graphix_pattern_trace, draw_graphix_pattern
 from .domain.commands import CommandRecord
 from .domain.simulation import BackendComparisonReport, SimulationReport
 from .domain.summaries import PatternSummary, ResourceSummary
-from .domain.traces import RunTrace
+from .domain.traces import RunTrace, TraceAnimationHandle
 from .infrastructure.graphix_adapter import GraphixCircuitProtocol, extract_command_records
-
-_UNIMPLEMENTED_PUBLIC_API_MESSAGE = (
-    "{name} is part of the public Graphix Lab API surface, but its Graphix-backed "
-    "behavior is not implemented yet in this checkout."
-)
+from .infrastructure.qiskit_adapter import convert_qiskit_circuit
 
 
 def circuit(width: int) -> LabCircuit:
@@ -32,8 +43,7 @@ def from_graphix_pattern(pattern: object) -> LabPattern:
 
 
 def from_qiskit(qc: object, *, angle_units: str = "radians") -> LabCircuit:
-    del qc, angle_units
-    _raise_not_ready_public_api("from_qiskit")
+    return convert_qiskit_circuit(qc, angle_units=angle_units)
 
 
 @dataclass(frozen=True, slots=True)
@@ -47,43 +57,49 @@ class LabCircuit:
     )
 
     def __post_init__(self) -> None:
-        if self.width <= 0:
-            raise ValueError("width must be a positive integer.")
+        object.__setattr__(self, "width", _validate_positive_circuit_width(self.width))
 
     def h(self, q: int) -> LabCircuit:
-        apply_single_qubit_gate(self._ensure_graphix_circuit(), "h", q)
-        return self
+        return self._apply_single_qubit_gate("h", q)
 
     def x(self, q: int) -> LabCircuit:
-        apply_single_qubit_gate(self._ensure_graphix_circuit(), "x", q)
-        return self
+        return self._apply_single_qubit_gate("x", q)
 
     def y(self, q: int) -> LabCircuit:
-        apply_single_qubit_gate(self._ensure_graphix_circuit(), "y", q)
-        return self
+        return self._apply_single_qubit_gate("y", q)
 
     def z(self, q: int) -> LabCircuit:
-        apply_single_qubit_gate(self._ensure_graphix_circuit(), "z", q)
-        return self
+        return self._apply_single_qubit_gate("z", q)
 
     def s(self, q: int) -> LabCircuit:
-        apply_single_qubit_gate(self._ensure_graphix_circuit(), "s", q)
-        return self
+        return self._apply_single_qubit_gate("s", q)
 
     def rx(self, q: int, angle: float, *, units: str = "pi") -> LabCircuit:
-        apply_rotation_gate(self._ensure_graphix_circuit(), "rx", q, angle, units=units)
-        return self
+        return self._apply_rotation_gate("rx", q, angle, units=units)
 
     def ry(self, q: int, angle: float, *, units: str = "pi") -> LabCircuit:
-        apply_rotation_gate(self._ensure_graphix_circuit(), "ry", q, angle, units=units)
-        return self
+        return self._apply_rotation_gate("ry", q, angle, units=units)
 
     def rz(self, q: int, angle: float, *, units: str = "pi") -> LabCircuit:
-        apply_rotation_gate(self._ensure_graphix_circuit(), "rz", q, angle, units=units)
-        return self
+        return self._apply_rotation_gate("rz", q, angle, units=units)
 
     def cnot(self, control: int, target: int) -> LabCircuit:
         apply_cnot_gate(self._ensure_graphix_circuit(), control, target)
+        return self
+
+    def _apply_single_qubit_gate(self, gate_name: str, q: int) -> LabCircuit:
+        apply_single_qubit_gate(self._ensure_graphix_circuit(), gate_name, q)
+        return self
+
+    def _apply_rotation_gate(
+        self,
+        gate_name: str,
+        q: int,
+        angle: float,
+        *,
+        units: str = "pi",
+    ) -> LabCircuit:
+        apply_rotation_gate(self._ensure_graphix_circuit(), gate_name, q, angle, units=units)
         return self
 
     def compile(self) -> LabPattern:
@@ -126,13 +142,17 @@ class LabPattern:
         return extract_command_records(self.pattern)
 
     def summary(self) -> PatternSummary:
-        _raise_not_ready_public_api("LabPattern.summary")
+        commands, resources = self._commands_and_resources()
+        return build_pattern_summary(commands, resources=resources)
 
     def explain(self) -> str:
-        _raise_not_ready_public_api("LabPattern.explain")
+        commands, resources = self._commands_and_resources()
+        summary = build_pattern_summary(commands, resources=resources)
+        return build_pattern_explanation(summary, resources=resources)
 
     def resources(self) -> ResourceSummary:
-        _raise_not_ready_public_api("LabPattern.resources")
+        _, resources = self._commands_and_resources()
+        return resources
 
     def run(
         self,
@@ -141,26 +161,69 @@ class LabPattern:
         seed: int | None = None,
         trace: bool = False,
     ) -> SimulationReport:
-        del backend, seed, trace
-        _raise_not_ready_public_api("LabPattern.run")
+        return run_graphix_pattern(
+            self.pattern,
+            backend=backend,
+            seed=seed,
+            trace=trace,
+        )
 
     def trace(self) -> RunTrace:
-        _raise_not_ready_public_api("LabPattern.trace")
+        return trace_graphix_pattern(self.pattern)
 
-    def draw(self) -> object:
-        _raise_not_ready_public_api("LabPattern.draw")
+    def draw(
+        self,
+        *,
+        show_flow: bool = True,
+        show_corrections: bool = True,
+        layout: str = "auto",
+        ax: Axes | None = None,
+        delegate_to_graphix: bool = False,
+    ) -> Figure:
+        commands = self.commands()
+        return draw_graphix_pattern(
+            self.pattern,
+            commands,
+            show_flow=show_flow,
+            show_corrections=show_corrections,
+            layout=layout,
+            ax=ax,
+            delegate_to_graphix=delegate_to_graphix,
+        )
 
-    def animate(self) -> object:
-        _raise_not_ready_public_api("LabPattern.animate")
+    def animate(
+        self,
+        *,
+        show_flow: bool = True,
+        show_corrections: bool = True,
+        layout: str = "auto",
+    ) -> TraceAnimationHandle:
+        commands = self.commands()
+        return animate_graphix_pattern_trace(
+            self.pattern,
+            commands,
+            show_flow=show_flow,
+            show_corrections=show_corrections,
+            layout=layout,
+        )
 
-    def compare_backends(self) -> BackendComparisonReport:
-        _raise_not_ready_public_api("LabPattern.compare_backends")
+    def compare_backends(
+        self,
+        backends: str | Sequence[str] | None = None,
+        *,
+        seed: int | None = None,
+    ) -> BackendComparisonReport:
+        return compare_graphix_backends(
+            self.pattern,
+            backends=backends,
+            seed=seed,
+        )
 
     def _apply_graphix_pattern_method(self, method_name: str) -> LabPattern:
         updated_pattern = apply_graphix_pattern_method(self.pattern, method_name)
         object.__setattr__(self, "pattern", updated_pattern)
         return self
 
-
-def _raise_not_ready_public_api(name: str) -> NoReturn:
-    raise NotImplementedError(_UNIMPLEMENTED_PUBLIC_API_MESSAGE.format(name=name))
+    def _commands_and_resources(self) -> tuple[tuple[CommandRecord, ...], ResourceSummary]:
+        commands = self.commands()
+        return commands, build_resource_summary(commands)

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import math
+from collections.abc import Callable
 from dataclasses import dataclass
 from types import ModuleType, SimpleNamespace
 from typing import cast
@@ -146,5 +147,102 @@ def test_lab_circuit_rejects_unsupported_angle_units(
 
     with pytest.raises(ValueError, match="Unsupported angle units"):
         lab_circuit.rx(0, 90.0, units="degrees")
+
+    assert _unwrap_graphix_circuit(lab_circuit).operations == []
+
+
+@pytest.mark.parametrize("width", [True, False, 2.0, "2", 1 + 0j, 0, -1])
+def test_lab_circuit_rejects_invalid_width_values(width: object) -> None:
+    with pytest.raises(ValueError, match="width must be a positive integer"):
+        circuit(width)  # type: ignore[arg-type]
+
+
+@pytest.mark.parametrize(
+    ("operation_name", "apply_invalid_operation"),
+    [
+        ("h_true", lambda lab_circuit: lab_circuit.h(True)),
+        ("x_false", lambda lab_circuit: lab_circuit.x(False)),
+        ("y_float", lambda lab_circuit: lab_circuit.y(0.0)),
+        ("z_float", lambda lab_circuit: lab_circuit.z(1.0)),
+        ("s_true", lambda lab_circuit: lab_circuit.s(True)),
+        ("rx_true_qubit", lambda lab_circuit: lab_circuit.rx(True, 0.5)),
+        ("ry_false_qubit", lambda lab_circuit: lab_circuit.ry(False, 0.5)),
+        ("rz_float_qubit", lambda lab_circuit: lab_circuit.rz(0.0, 0.5)),
+        ("cnot_true_control", lambda lab_circuit: lab_circuit.cnot(True, 1)),
+        ("cnot_false_target", lambda lab_circuit: lab_circuit.cnot(0, False)),
+        ("cnot_float_control", lambda lab_circuit: lab_circuit.cnot(0.0, 1)),
+    ],
+)
+def test_lab_circuit_rejects_invalid_qubit_indices(
+    monkeypatch: pytest.MonkeyPatch,
+    operation_name: str,
+    apply_invalid_operation: Callable[[LabCircuit], object],
+) -> None:
+    del operation_name
+    _install_fake_graphix(monkeypatch)
+    lab_circuit = circuit(2)
+
+    with pytest.raises(TypeError, match="must be an integer qubit index"):
+        apply_invalid_operation(lab_circuit)
+
+    assert _unwrap_graphix_circuit(lab_circuit).operations == []
+
+
+@pytest.mark.parametrize(
+    ("operation_name", "apply_invalid_operation"),
+    [
+        ("h_negative", lambda lab_circuit: lab_circuit.h(-1)),
+        ("h_too_large", lambda lab_circuit: lab_circuit.h(2)),
+        ("rx_too_large", lambda lab_circuit: lab_circuit.rx(2, 0.5)),
+        ("cnot_negative", lambda lab_circuit: lab_circuit.cnot(-1, 1)),
+        ("cnot_too_large", lambda lab_circuit: lab_circuit.cnot(0, 2)),
+    ],
+)
+def test_lab_circuit_rejects_out_of_range_qubit_indices(
+    monkeypatch: pytest.MonkeyPatch,
+    operation_name: str,
+    apply_invalid_operation: Callable[[LabCircuit], object],
+) -> None:
+    del operation_name
+    _install_fake_graphix(monkeypatch)
+    lab_circuit = circuit(2)
+
+    with pytest.raises(ValueError, match="must be between 0 and 1"):
+        apply_invalid_operation(lab_circuit)
+
+    assert _unwrap_graphix_circuit(lab_circuit).operations == []
+
+
+def test_lab_circuit_rejects_cnot_with_identical_control_and_target(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _install_fake_graphix(monkeypatch)
+    lab_circuit = circuit(2)
+
+    with pytest.raises(ValueError, match="control and target must refer to different qubits"):
+        lab_circuit.cnot(1, 1)
+
+    assert _unwrap_graphix_circuit(lab_circuit).operations == []
+
+
+@pytest.mark.parametrize(
+    ("operation_name", "apply_invalid_operation"),
+    [
+        ("rx_true_angle", lambda lab_circuit: lab_circuit.rx(0, True)),
+        ("ry_false_angle", lambda lab_circuit: lab_circuit.ry(0, False)),
+        ("rz_true_angle", lambda lab_circuit: lab_circuit.rz(0, True)),
+    ],
+)
+def test_lab_circuit_rejects_boolean_rotation_angles(
+    monkeypatch: pytest.MonkeyPatch,
+    operation_name: str,
+    apply_invalid_operation: Callable[[LabCircuit], object],
+) -> None:
+    del operation_name
+    _install_fake_graphix(monkeypatch)
+    lab_circuit = circuit(2)
+
+    with pytest.raises(TypeError, match="angle must be a real number"):
+        apply_invalid_operation(lab_circuit)
 
     assert _unwrap_graphix_circuit(lab_circuit).operations == []

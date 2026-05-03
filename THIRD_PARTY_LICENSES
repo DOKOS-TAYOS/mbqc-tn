@@ -1,13 +1,38 @@
-| Name              | Version | License                    | URL                                             |
-|-------------------|---------|----------------------------|-------------------------------------------------|
-| Pygments          | 2.20.0  | BSD-2-Clause               | https://pygments.org                            |
-| colorama          | 0.4.6   | BSD License                | https://github.com/tartley/colorama             |
-| iniconfig         | 2.3.0   | MIT                        | https://github.com/pytest-dev/iniconfig         |
-| nodeenv           | 1.10.0  | BSD License                | https://github.com/ekalinin/nodeenv             |
-| packaging         | 26.2    | Apache-2.0 OR BSD-2-Clause | https://github.com/pypa/packaging               |
-| pluggy            | 1.6.0   | MIT License                | UNKNOWN                                         |
-| project-name      | 0.0.0   | MIT                        | UNKNOWN                                         |
-| pyright           | 1.1.409 | MIT                        | https://github.com/RobertCraigie/pyright-python |
-| pytest            | 9.0.3   | MIT                        | https://docs.pytest.org/en/latest/              |
-| ruff              | 0.15.12 | MIT                        | https://docs.astral.sh/ruff                     |
-| typing_extensions | 4.15.0  | PSF-2.0                    | https://github.com/python/typing_extensions     |
+| Name              | Version     | License                                            | URL                                             |
+|-------------------|-------------|----------------------------------------------------|-------------------------------------------------|
+| Pygments          | 2.20.0      | BSD-2-Clause                                       | https://pygments.org                            |
+| autoray           | 0.8.10      | Apache Software License                            | https://github.com/jcmgray/autoray/             |
+| colorama          | 0.4.6       | BSD License                                        | https://github.com/tartley/colorama             |
+| contourpy         | 1.3.3       | BSD License                                        | https://github.com/contourpy/contourpy          |
+| cotengra          | 0.7.5       | Apache Software License                            | https://github.com/jcmgray/cotengra/            |
+| cycler            | 0.12.1      | BSD License                                        | https://matplotlib.org/cycler/                  |
+| cytoolz           | 1.1.0       | BSD-3-Clause                                       | https://github.com/pytoolz/cytoolz              |
+| fonttools         | 4.62.1      | MIT                                                | http://github.com/fonttools/fonttools           |
+| graphix           | 0.3.5       | UNKNOWN                                            | https://graphix.readthedocs.io                  |
+| iniconfig         | 2.3.0       | MIT                                                | https://github.com/pytest-dev/iniconfig         |
+| kiwisolver        | 1.5.0       | BSD License                                        | https://github.com/nucleic/kiwi                 |
+| llvmlite          | 0.47.0      | BSD-2-Clause AND Apache-2.0 WITH LLVM-exception    | http://llvmlite.readthedocs.io                  |
+| matplotlib        | 3.10.9      | Python Software Foundation License                 | https://matplotlib.org                          |
+| mpmath            | 1.3.0       | BSD License                                        | http://mpmath.org/                              |
+| networkx          | 3.6.1       | BSD-3-Clause                                       | https://networkx.org/                           |
+| nodeenv           | 1.10.0      | BSD License                                        | https://github.com/ekalinin/nodeenv             |
+| numba             | 0.65.1      | BSD License                                        | https://numba.pydata.org                        |
+| numpy             | 2.4.4       | BSD-3-Clause AND 0BSD AND MIT AND Zlib AND CC0-1.0 | https://numpy.org                               |
+| opt_einsum        | 3.4.0       | MIT                                                | UNKNOWN                                         |
+| packaging         | 26.2        | Apache-2.0 OR BSD-2-Clause                         | https://github.com/pypa/packaging               |
+| pillow            | 12.2.0      | MIT-CMU                                            | https://python-pillow.github.io                 |
+| pluggy            | 1.6.0       | MIT License                                        | UNKNOWN                                         |
+| project-name      | 0.0.0       | MIT                                                | UNKNOWN                                         |
+| psutil            | 7.2.2       | BSD-3-Clause                                       | https://github.com/giampaolo/psutil             |
+| pyparsing         | 3.3.2       | MIT                                                | https://github.com/pyparsing/pyparsing/         |
+| pyright           | 1.1.409     | MIT                                                | https://github.com/RobertCraigie/pyright-python |
+| pytest            | 9.0.3       | MIT                                                | https://docs.pytest.org/en/latest/              |
+| python-dateutil   | 2.9.0.post0 | Apache Software License; BSD License               | https://github.com/dateutil/dateutil            |
+| quimb             | 1.13.0      | Apache Software License                            | https://github.com/jcmgray/quimb/               |
+| ruff              | 0.15.12     | MIT                                                | https://docs.astral.sh/ruff                     |
+| scipy             | 1.17.1      | BSD License                                        | https://scipy.org/                              |
+| six               | 1.17.0      | MIT License                                        | https://github.com/benjaminp/six                |
+| sympy             | 1.14.0      | BSD License                                        | https://sympy.org                               |
+| toolz             | 1.1.0       | BSD-3-Clause                                       | https://github.com/pytoolz/toolz                |
+| tqdm              | 4.67.3      | MPL-2.0 AND MIT                                    | https://tqdm.github.io                          |
+| typing_extensions | 4.15.0      | PSF-2.0                                            | https://github.com/python/typing_extensions     |

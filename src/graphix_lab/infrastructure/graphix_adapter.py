@@ -8,6 +8,14 @@ from graphix_lab.domain.errors import GraphixCompatibilityError
 from graphix_lab.infrastructure.graphix_runtime import import_graphix_root, require_graphix_callable
 
 _KNOWN_COMMAND_KINDS = frozenset({"N", "E", "M", "X", "Z", "C"})
+_REQUIRED_PATTERN_METHODS = ("copy", "standardize", "shift_signals")
+_ADDITIONAL_PATTERN_METHODS = (
+    "perform_pauli_measurements",
+    "simulate_pattern",
+    "draw_graph",
+    "extract_causal_flow",
+    "extract_gflow",
+)
 
 
 class GraphixCircuitProtocol(Protocol):
@@ -82,7 +90,7 @@ def extract_command_records(pattern: object) -> tuple[CommandRecord, ...]:
 
 
 def _iter_pattern_commands(pattern: object) -> tuple[object, ...]:
-    if not isinstance(pattern, Iterable):
+    if not _is_graphix_pattern_like(pattern):
         raise GraphixCompatibilityError(
             feature="Pattern.__iter__",
             message=(
@@ -92,7 +100,7 @@ def _iter_pattern_commands(pattern: object) -> tuple[object, ...]:
         )
 
     try:
-        return tuple(pattern)
+        return tuple(cast(Iterable[object], pattern))
     except TypeError as error:
         raise GraphixCompatibilityError(
             feature="Pattern.__iter__",
@@ -101,6 +109,22 @@ def _iter_pattern_commands(pattern: object) -> tuple[object, ...]:
                 "not iterate over to inspect its command sequence."
             ),
         ) from error
+
+
+def _is_graphix_pattern_like(value: object) -> bool:
+    if isinstance(value, (str, bytes, bytearray)) or not isinstance(value, Iterable):
+        return False
+
+    if not all(
+        callable(getattr(value, attribute_name, None))
+        for attribute_name in _REQUIRED_PATTERN_METHODS
+    ):
+        return False
+
+    return any(
+        callable(getattr(value, attribute_name, None))
+        for attribute_name in _ADDITIONAL_PATTERN_METHODS
+    )
 
 
 def _extract_command_record(index: int, graphix_command: object) -> CommandRecord:
@@ -166,17 +190,20 @@ def _extract_nodes(
     return (node,)
 
 
+def _read_command_attribute(graphix_command: object, *, attribute_name: str) -> object | None:
+    attribute_value = getattr(graphix_command, attribute_name, None)
+    if attribute_value is not None:
+        return attribute_value
+    return _extract_measurement_attribute(graphix_command, attribute_name=attribute_name)
+
+
 def _extract_angle(graphix_command: object) -> float | None:
-    angle_value = getattr(graphix_command, "angle", None)
-    if angle_value is None:
-        angle_value = _extract_measurement_attribute(graphix_command, attribute_name="angle")
+    angle_value = _read_command_attribute(graphix_command, attribute_name="angle")
     return _coerce_float(angle_value)
 
 
 def _extract_plane(graphix_command: object) -> str | None:
-    plane_value = getattr(graphix_command, "plane", None)
-    if plane_value is None:
-        plane_value = _extract_measurement_attribute(graphix_command, attribute_name="plane")
+    plane_value = _read_command_attribute(graphix_command, attribute_name="plane")
     if plane_value is None:
         return None
     plane_name = getattr(plane_value, "name", None)

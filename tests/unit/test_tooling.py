@@ -1,6 +1,8 @@
 from __future__ import annotations
 
+import shutil
 import sys
+import tomllib
 from pathlib import Path
 from subprocess import CompletedProcess
 
@@ -9,21 +11,58 @@ import pytest
 import graphix_lab.app.tooling_service as tooling_service
 from graphix_lab.app.tooling_service import (
     build_bootstrap_resync_command,
+    build_cli_help_command,
+    build_import_smoke_command,
     build_license_command,
     build_quality_commands,
     build_test_command,
+    load_package_name,
     run_commands,
 )
 
 
-def test_quality_commands_cover_lint_format_test_and_typecheck() -> None:
-    commands = build_quality_commands(include_format_fix=True)
+def _repo_local_workspace(name: str) -> Path:
+    repo_root = Path(__file__).resolve().parents[2]
+    workspace_root = repo_root / "test-artifacts" / name
+    if workspace_root.exists():
+        shutil.rmtree(workspace_root)
+    workspace_root.mkdir(parents=True)
+    return workspace_root
+
+
+def test_quality_commands_cover_lint_format_release_smoke_test_and_typecheck() -> None:
+    workspace_root = _repo_local_workspace("tooling-quality-commands")
+    (workspace_root / "pyproject.toml").write_text(
+        """
+[tool.vibe_template]
+package_name = "graphix_lab"
+""".strip(),
+        encoding="utf-8",
+    )
+
+    commands = build_quality_commands(project_root=workspace_root, include_format_fix=True)
 
     assert commands == [
         [sys.executable, "-m", "ruff", "check", ".", "--fix"],
         [sys.executable, "-m", "ruff", "format", "."],
+        [sys.executable, "-c", "import graphix_lab; print(graphix_lab.__all__)"],
+        [sys.executable, "-m", "graphix_lab.cli", "--help"],
         [sys.executable, "-m", "pytest"],
         [sys.executable, "-m", "pyright"],
+    ]
+
+
+def test_release_smoke_commands_use_the_requested_package_name() -> None:
+    assert build_import_smoke_command("graphix_lab") == [
+        sys.executable,
+        "-c",
+        "import graphix_lab; print(graphix_lab.__all__)",
+    ]
+    assert build_cli_help_command("graphix_lab") == [
+        sys.executable,
+        "-m",
+        "graphix_lab.cli",
+        "--help",
     ]
 
 
@@ -65,6 +104,32 @@ def test_bootstrap_resync_command_uses_active_interpreter() -> None:
         "-e",
         ".[dev]",
     ]
+
+
+def test_load_package_name_defaults_to_graphix_lab_when_pyproject_is_missing() -> None:
+    workspace_root = _repo_local_workspace("tooling-package-name-default")
+
+    assert load_package_name(workspace_root) == "graphix_lab"
+
+
+def test_pyproject_release_metadata_keeps_urls_and_dependencies_separate() -> None:
+    repo_root = Path(__file__).resolve().parents[2]
+    pyproject_data = tomllib.loads((repo_root / "pyproject.toml").read_text(encoding="utf-8"))
+    project_data = pyproject_data["project"]
+
+    assert project_data["urls"] == {
+        "Homepage": "https://github.com/DOKOS-TAYOS/mbqc-tn",
+        "Repository": "https://github.com/DOKOS-TAYOS/mbqc-tn",
+        "Issues": "https://github.com/DOKOS-TAYOS/mbqc-tn/issues",
+    }
+    assert "graphix>=0.3.5,<0.4" in project_data["dependencies"]
+
+
+def test_pyproject_disables_cacheprovider_for_portable_pytest_runs() -> None:
+    repo_root = Path(__file__).resolve().parents[2]
+    pyproject_data = tomllib.loads((repo_root / "pyproject.toml").read_text(encoding="utf-8"))
+
+    assert "-p no:cacheprovider" in pyproject_data["tool"]["pytest"]["ini_options"]["addopts"]
 
 
 def test_run_commands_uses_subprocess_with_workspace_root(
