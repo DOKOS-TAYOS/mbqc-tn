@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from graphix_lab.domain.errors import GraphixCompatibilityError
+from graphix_lab.infrastructure.graphix_adapter import _is_graphix_pattern_like
 from graphix_lab.infrastructure.graphix_runtime import require_graphix_callable
 
 
@@ -35,11 +36,41 @@ def apply_graphix_pattern_method(pattern: object, method_name: str) -> object:
         feature_name=feature_name,
         missing_message=_build_missing_pattern_method_message(feature_name),
     )
-    updated_pattern = graphix_method()
-    if updated_pattern is None:
-        return pattern
-    return updated_pattern
+    method_result = graphix_method()
+    return _coerce_pattern_method_result(
+        pattern,
+        method_name=method_name,
+        feature_name=feature_name,
+        method_result=method_result,
+    )
 
 
 def _build_missing_pattern_method_message(feature_name: str) -> str:
     return f"The installed Graphix runtime does not expose {feature_name}() on pattern objects."
+
+
+def _coerce_pattern_method_result(
+    pattern: object,
+    *,
+    method_name: str,
+    feature_name: str,
+    method_result: object | None,
+) -> object:
+    if method_result is None:
+        return pattern
+    if _is_pattern_like(method_result) or isinstance(method_result, type(pattern)):
+        return method_result
+    if method_name == "shift_signals" and isinstance(method_result, dict):
+        return pattern
+    raise GraphixCompatibilityError(
+        feature=feature_name,
+        message=(
+            f"The installed Graphix runtime exposed {feature_name}(), but it returned "
+            f"{type(method_result).__name__} instead of mutating in place or returning a "
+            "pattern object."
+        ),
+    )
+
+
+def _is_pattern_like(value: object) -> bool:
+    return _is_graphix_pattern_like(value)

@@ -1,26 +1,40 @@
-# Public API contract
+# Public API Contract
 
-## Top-level functions
+The public surface is the top-level `graphix_lab` package.
+
+## Top-Level Imports
 
 ```python
-from graphix_lab import circuit, from_graphix_pattern, from_qiskit
+from graphix_lab import (
+    BackendComparisonReport,
+    BackendRunReport,
+    CommandRecord,
+    GraphixCapabilities,
+    LabCircuit,
+    LabPattern,
+    PatternSummary,
+    ResourceSummary,
+    RunTrace,
+    SimulationReport,
+    TraceAnimationHandle,
+    TraceFrame,
+    circuit,
+    from_graphix_pattern,
+    from_qiskit,
+    graphix_info,
+)
 ```
 
-### `circuit(width: int) -> LabCircuit`
+## Constructors
 
-Create a wrapper around `graphix.Circuit`.
-
-### `from_graphix_pattern(pattern: object) -> LabPattern`
-
-Wrap an existing Graphix pattern.
-
-### `from_qiskit(qc: object, *, angle_units: str = "radians") -> LabCircuit`
-
-Optional frontend. This function should raise a clear `OptionalDependencyError` when Qiskit is not installed.
+- `circuit(width: int) -> LabCircuit`
+- `from_graphix_pattern(pattern: object) -> LabPattern`
+- `from_qiskit(qc: object, *, angle_units: str = "radians") -> LabCircuit`
+- `graphix_info() -> GraphixCapabilities`
 
 ## `LabCircuit`
 
-Recommended methods:
+Current fluent methods:
 
 ```python
 .h(q: int) -> LabCircuit
@@ -36,11 +50,15 @@ Recommended methods:
 .to_graphix() -> object
 ```
 
-Graphix rotation methods use angles in units of π. Graphix Lab should make this explicit and optionally convert from radians.
+Angle units are explicit:
+
+- `pi` means Graphix-style pi units
+- `radians` are converted by dividing by `math.pi`
+- any other unit raises `ValueError`
 
 ## `LabPattern`
 
-Recommended methods:
+Current wrapped-pattern methods:
 
 ```python
 .to_graphix() -> object
@@ -50,18 +68,25 @@ Recommended methods:
 .perform_pauli_measurements() -> LabPattern
 .commands() -> tuple[CommandRecord, ...]
 .summary() -> PatternSummary
-.explain() -> str
 .resources() -> ResourceSummary
-.run(backend: str = "statevector", *, seed: int | None = None, trace: bool = False) -> SimulationReport
+.explain() -> str
 .trace() -> RunTrace
 .draw(...) -> matplotlib.figure.Figure
-.animate(...) -> object
+.animate(...) -> TraceAnimationHandle
+.run(...) -> SimulationReport
+.compare_backends(...) -> BackendComparisonReport
 ```
 
-Mutating Graphix operations should be wrapped carefully. If a Graphix method mutates in place, document whether the wrapper mutates in place or returns a copy.
+Mutation helpers update the wrapped Graphix pattern and return the same
+`LabPattern`.
 
-## Result objects
+`commands()` currently gives named adapters for `N`, `E`, `M`, `X`, `Z`, and
+`C`. Unrecognized runtime command objects still surface through
+`CommandRecord(kind="UNKNOWN", raw=...)` so users can inspect them without
+crashing.
 
-Result objects should be typed dataclasses with predictable fields and readable `repr` output.
+## Result Objects
 
-Avoid returning raw tuples when a named dataclass would be clearer.
+The summary, trace, simulation, and comparison objects are public frozen
+dataclasses with readable string forms. They are designed to be script-friendly
+and test-friendly rather than notebook-only.

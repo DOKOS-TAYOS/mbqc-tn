@@ -2,9 +2,6 @@
 
 ## Public Python API
 
-Graphix Lab now exposes its public domain model plus live Graphix wrapper
-entrypoints for circuits and patterns.
-
 ```python
 from graphix_lab import (
     BackendComparisonReport,
@@ -17,6 +14,7 @@ from graphix_lab import (
     ResourceSummary,
     RunTrace,
     SimulationReport,
+    TraceAnimationHandle,
     TraceFrame,
     circuit,
     from_graphix_pattern,
@@ -25,7 +23,11 @@ from graphix_lab import (
 )
 ```
 
-### Stable domain models
+Everything else should be treated as internal implementation detail.
+
+## Frozen Public Data Models
+
+The public report and trace objects are frozen dataclasses with typed fields:
 
 - `CommandRecord`
 - `PatternSummary`
@@ -35,75 +37,127 @@ from graphix_lab import (
 - `SimulationReport`
 - `BackendRunReport`
 - `BackendComparisonReport`
+- `TraceAnimationHandle`
+- `GraphixCapabilities`
 
-All of these are frozen dataclasses with typed fields so later prompts can build
-command summaries, traces, simulation reports, and backend comparisons on top
-of a stable contract.
+They are intended to be easy to print, compare, and pass between examples,
+tests, and teaching notebooks later on.
 
-### Wrapper entrypoints
+## Top-Level Functions
 
 ### `circuit(width: int) -> LabCircuit`
 
-Creates a `LabCircuit` fluent wrapper that delegates gate construction to
-`graphix.Circuit`.
+Creates a live `LabCircuit` wrapper around `graphix.Circuit`.
 
-Supported methods in this prompt:
-
-- `.h(q)`
-- `.x(q)`
-- `.y(q)`
-- `.z(q)`
-- `.s(q)`
-- `.rx(q, angle, units="pi")`
-- `.ry(q, angle, units="pi")`
-- `.rz(q, angle, units="pi")`
-- `.cnot(control, target)`
-- `.compile()`
-- `.to_graphix()`
-
-Rotation angles are explicit:
-
-- `units="pi"` passes the numeric value through as Graphix Lab's public
-  pi-scaled convention.
-- `units="radians"` converts the numeric angle by dividing by `math.pi` before
-  delegating.
-- Any other unit raises a clear `ValueError`.
-
-`compile()` wraps `circuit.transpile().pattern` in `LabPattern`, and
-`to_graphix()` returns the wrapped Graphix circuit object.
+- `width` must be a positive integer.
+- The underlying Graphix circuit is created lazily the first time a gate is
+  applied.
 
 ### `from_graphix_pattern(pattern: object) -> LabPattern`
 
-Wraps a raw Graphix pattern object in `LabPattern` by reference.
+Wraps an existing Graphix pattern object by reference.
 
-Available live pattern methods in this prompt:
+### `from_qiskit(qc: object, *, angle_units: str = "radians") -> LabCircuit`
 
-- `.to_graphix()`
-- `.copy()`
-- `.standardize()`
-- `.shift_signals()`
-- `.perform_pauli_measurements()`
-- `.commands()`
+Imports a supported subset of Qiskit gates into a live `LabCircuit`.
 
-Mutation semantics are explicit:
+- `qiskit` remains optional.
+- If `qiskit` is missing from the active `.venv`, Graphix Lab raises
+  `OptionalDependencyError`.
+- Supported instructions are `h`, `x`, `y`, `z`, `s`, `rx`, `ry`, `rz`, and
+  `cx` / `cnot`.
+- Unsupported instructions raise `UnsupportedGateError` with the gate name and
+  zero-based instruction index.
+- Qubit numbering follows `QuantumCircuit.find_bit(...)`.
 
-- `standardize()`, `shift_signals()`, and `perform_pauli_measurements()`
-  mutate the wrapped Graphix pattern and return the same `LabPattern` wrapper
-  for fluent chaining.
-- If a Graphix runtime method returns a replacement pattern object instead of
-  mutating in place, Graphix Lab keeps the wrapper aligned to that replacement
-  and still returns `self`.
-- `copy()` is only available when the active Graphix runtime exposes
-  `Pattern.copy()`. If that method is missing, Graphix Lab raises
-  `GraphixCompatibilityError` with a clear message explaining that the wrapper
-  otherwise works in place.
+### `graphix_info() -> GraphixCapabilities`
 
-If an installed Graphix version does not expose one of the required pattern
-methods, Graphix Lab raises `GraphixCompatibilityError` instead of failing with
-an unhelpful attribute error.
+Returns a snapshot of the active Graphix runtime capabilities.
 
-`commands()` iterates over the wrapped Graphix pattern and normalizes each
-command into a stable `CommandRecord` with:
+## `LabCircuit`
+
+`LabCircuit` is a small fluent wrapper. It mutates the underlying Graphix
+circuit and returns `self` from its gate methods.
+
+```python
+.h(q: int) -> LabCircuit
+.x(q: int) -> LabCircuit
+.y(q: int) -> LabCircuit
+.z(q: int) -> LabCircuit
+.s(q: int) -> LabCircuit
+.rx(q: int, angle: float, *, units: str = "pi") -> LabCircuit
+.ry(q: int, angle: float, *, units: str = "pi") -> LabCircuit
+.rz(q: int, angle: float, *, units: str = "pi") -> LabCircuit
+.cnot(control: int, target: int) -> LabCircuit
+.compile() -> LabPattern
+.to_graphix() -> object
+```
+
+Angle handling is explicit:
+
+- `units="pi"` passes the numeric value through as Graphix-style pi units.
+- `units="radians"` converts by dividing by `math.pi`.
+- Any other value raises `ValueError`.
+
+## `LabPattern`
+
+`LabPattern` wraps a Graphix pattern object and exposes the current educational
+inspection surface:
+
+```python
+.to_graphix() -> object
+.copy() -> LabPattern
+.standardize() -> LabPattern
+.shift_signals() -> LabPattern
+.perform_pauli_measurements() -> LabPattern
+.commands() -> tuple[CommandRecord, ...]
+.summary() -> PatternSummary
+.resources() -> ResourceSummary
+.explain() -> str
+.trace() -> RunTrace
+.draw(
+    *,
+    show_flow: bool = True,
+    show_corrections: bool = True,
+    layout: str = "auto",
+    ax: matplotlib.axes.Axes | None = None,
+    delegate_to_graphix: bool = False,
+) -> matplotlib.figure.Figure
+.animate(
+    *,
+    show_flow: bool = True,
+    show_corrections: bool = True,
+    layout: str = "auto",
+) -> TraceAnimationHandle
+.run(
+    backend: str = "statevector",
+    *,
+    seed: int | None = None,
+    trace: bool = False,
+) -> SimulationReport
+.compare_backends(
+    backends: collections.abc.Sequence[str] | None = None,
+    *,
+    seed: int | None = None,
+) -> BackendComparisonReport
+```
+
+### Mutation Semantics
+
+- `standardize()`, `shift_signals()`, and `perform_pauli_measurements()` update
+  the wrapped Graphix pattern and return the same `LabPattern`.
+- If Graphix returns a replacement pattern object instead of mutating in place,
+  Graphix Lab keeps the wrapper aligned to that replacement.
+- If Graphix returns auxiliary data while still mutating in place, as the real
+  `Pattern.shift_signals()` currently does, Graphix Lab keeps the wrapper bound
+  to the mutated pattern instead of replacing it with that auxiliary value.
+- `copy()` requires runtime support for `Pattern.copy()`. When it is missing,
+  Graphix Lab raises `GraphixCompatibilityError`.
+
+### Command Normalization
+
+`commands()` normalizes Graphix command objects into `CommandRecord` values with
+these fields:
 
 - `index`
 - `kind`
@@ -117,23 +171,53 @@ command into a stable `CommandRecord` with:
 - `raw`
 
 The adapter currently recognizes `N`, `E`, `M`, `X`, `Z`, and `C` commands.
-For measurement commands, Graphix Lab reads angle and plane information
-defensively from either direct command attributes or nested measurement objects.
-If Graphix exposes an unrecognized command object, Graphix Lab still returns a
-record with `kind="UNKNOWN"` and the raw `repr` so callers can inspect it
-without crashing.
+Unknown command objects are still returned as records with `kind="UNKNOWN"` and
+their raw `repr(...)`. This matters in practice after some Graphix rewrites,
+such as `shift_signals()`, because newer command shapes may not yet have a
+named Graphix Lab adapter.
 
-### `from_qiskit(qc: object, *, angle_units: str = "radians") -> LabCircuit`
+### Summaries And Explanations
 
-Reserved public entrypoint for the later Qiskit adapter. It currently raises a
-clear `NotImplementedError` instead of pretending the adapter exists.
+- `summary()` returns the compact `PatternSummary` view.
+- `resources()` returns the fuller `ResourceSummary`.
+- `explain()` formats the same structural information into a readable,
+  teaching-oriented multi-line string.
 
-### `graphix_info() -> GraphixCapabilities`
+Input and output nodes are inferred conservatively from the normalized command
+stream. These values are useful for quick inspection, but they are not a
+replacement for deeper Graphix semantic analyses.
 
-Returns a `GraphixCapabilities` snapshot for the active Graphix runtime.
+### Trace And Visualization
 
-If Graphix is not installed in the active `.venv`, this function raises a clear
-domain error instead of failing with a raw import error.
+- `trace()` returns a standalone conceptual `RunTrace`.
+- Each `TraceFrame` represents the state immediately after its command.
+- `draw()` returns a headless-safe Matplotlib `Figure`.
+- `animate()` returns a `TraceAnimationHandle` that keeps the figure, slider,
+  description text, trace, and update callback alive for interactive use.
+
+By default, the local renderer uses normalized `CommandRecord` objects with
+NetworkX and Matplotlib. `delegate_to_graphix=True` opts into Graphix's own
+drawer when that runtime path is available.
+
+### Simulation
+
+`run()` delegates execution to the active Graphix runtime.
+
+- Graphix Lab prefers `Pattern.simulate_pattern()` when available.
+- It falls back to `graphix.simulator.PatternSimulator` when needed.
+- Backend names are validated against the detected Graphix runtime support.
+- Unsupported names raise `UnsupportedBackendError`.
+- When `trace=True`, the returned `SimulationReport` includes the same light
+  conceptual trace model used by `.trace()`.
+
+### Backend Comparison
+
+`compare_backends()` runs the same wrapped pattern across a backend list and
+returns `BackendComparisonReport`.
+
+- If `backends=None`, Graphix Lab uses the detected supported backend order.
+- Individual backend failures are recorded without aborting the whole report.
+- `str(report)` renders a readable plain-text table for terminals and examples.
 
 ## Public CLI
 
@@ -143,12 +227,12 @@ domain error instead of failing with a raw import error.
 - `clean`
 - `licenses`
 
-### CLI behavior notes
+### CLI Notes
 
-- `bootstrap` is for a fresh template copy only. Once `bootstrap_required` becomes `False`, the command exits with an error instead of prompting again.
-- `quality` runs Ruff, pytest, and pyright through the active interpreter, which keeps `.venv` resolution consistent on Windows and Linux.
+- `bootstrap` is only for fresh template copies, not for this already
+  bootstrapped repository.
+- `quality` runs Ruff, pytest, and pyright through the active interpreter.
 - `test` runs pytest through the active interpreter.
-- `clean` removes caches and temporary artifacts, but stays conservative around `.venv`, `.git`, and inaccessible subtrees.
-- `licenses` regenerates `THIRD_PARTY_LICENSES` from the active interpreter and excludes the current project package.
-
-Treat everything outside `src/graphix_lab/__init__.py` and the CLI subcommands as internal implementation detail.
+- `clean` removes caches and temporary artifacts while staying conservative
+  around `.venv`, `.git`, and inaccessible subtrees.
+- `licenses` regenerates `THIRD_PARTY_LICENSES` from the active interpreter.

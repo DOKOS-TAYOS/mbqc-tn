@@ -2,30 +2,31 @@
 
 ## High-Level Shape
 
-This template uses a library-first structure with a thin CLI on top.
+Graphix Lab uses a library-first structure with a thin CLI on top.
 
-- `domain`: stable concepts and immutable metadata
-- `app`: orchestration and use-case services
-- `infrastructure`: adapters for filesystem and process execution when needed
-- `cli.py`: presentation layer for command-line entrypoints
+- `public_api.py`: the small public educational API
+- `domain`: stable typed data models and domain errors
+- `app`: orchestration services used by the public API and CLI
+- `infrastructure`: adapters for Graphix, optional Qiskit, and a few tooling
+  details
+- `cli.py`: command-line entrypoints that delegate to services
 
-## MVC Guidance
+## Design Direction
 
-Not every software library needs a visible Model-View-Controller folder tree on day one. Instead, this template keeps MVC as a growth rule:
+The project keeps Graphix as the source of truth for MBQC compilation and
+simulation. Graphix Lab adds:
+
+- clearer summaries and explanations
+- safer wrapper entrypoints
+- backend comparison and capability inspection
+- trace and visualization helpers that stay script-friendly and headless-safe
+
+## Separation Of Responsibilities
 
 - model-like concepts live in `domain`
-- controller-like orchestration lives in `app`
-- views or user-facing adapters live in CLI, APIs, or future UI layers
+- orchestration lives in `app`
+- external-library details live in `infrastructure`
+- user-facing commands stay in `cli.py` and the top-level public API
 
-This avoids empty scaffolding while keeping separation of responsibilities clear.
-
-## Bootstrap Strategy
-
-The template starts with placeholder metadata and a placeholder package name. Bootstrap:
-
-1. validates user answers
-2. rewrites tracked text files
-3. renames `src/graphix_lab`
-4. writes the chosen project license
-
-Relative imports inside the package reduce the amount of fragile rename logic.
+This keeps the repo small without forcing GUI or notebook scaffolding before it
+is needed.

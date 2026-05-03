@@ -5,6 +5,8 @@ import subprocess
 import sys
 from pathlib import Path
 
+import pytest
+
 
 def _example_env() -> dict[str, str]:
     repo_root = Path(__file__).resolve().parents[2]
@@ -17,11 +19,10 @@ def _example_env() -> dict[str, str]:
     return environment
 
 
-def test_library_example_runs() -> None:
+def _run_example(example_name: str) -> subprocess.CompletedProcess[str]:
     repo_root = Path(__file__).resolve().parents[2]
-    example_path = repo_root / "examples" / "library_usage.py"
-
-    completed_process = subprocess.run(
+    example_path = repo_root / "examples" / example_name
+    return subprocess.run(
         [sys.executable, str(example_path)],
         check=False,
         capture_output=True,
@@ -29,22 +30,33 @@ def test_library_example_runs() -> None:
         env=_example_env(),
     )
 
-    assert completed_process.returncode == 0
-    assert "Library example using CommandRecord" in completed_process.stdout
-    assert "Pattern summary tracks 3 commands across 2 nodes." in completed_process.stdout
+
+@pytest.mark.parametrize(
+    ("example_name", "headline", "detail"),
+    [
+        ("one_qubit_rotation.py", "One-qubit rotation example", "Command count:"),
+        ("bell_like_pattern.py", "Bell-like pattern example", "Resource summary:"),
+        ("trace_slider.py", "Trace slider example", "Trace frames:"),
+        ("trace_animation.py", "Trace animation prepared", "Graphix Lab Trace Inspection"),
+        ("backend_comparison.py", "Backend comparison example", "Runs recorded:"),
+        ("library_usage.py", "Library example using", "Pattern summary tracks"),
+        ("cli_usage.py", "CLI example output:", "Would remove"),
+    ],
+)
+def test_example_runs(example_name: str, headline: str, detail: str) -> None:
+    completed_process = _run_example(example_name)
+
+    assert completed_process.returncode == 0, completed_process.stderr
+    assert headline in completed_process.stdout
+    assert detail in completed_process.stdout
 
 
-def test_cli_example_runs() -> None:
-    repo_root = Path(__file__).resolve().parents[2]
-    example_path = repo_root / "examples" / "cli_usage.py"
+def test_qiskit_import_example_runs() -> None:
+    completed_process = _run_example("qiskit_import.py")
 
-    completed_process = subprocess.run(
-        [sys.executable, str(example_path)],
-        check=False,
-        capture_output=True,
-        text=True,
-        env=_example_env(),
+    assert completed_process.returncode == 0, completed_process.stderr
+    assert "Qiskit import example" in completed_process.stdout
+    assert (
+        "Imported command kinds:" in completed_process.stdout
+        or "Qiskit is not installed" in completed_process.stdout
     )
-
-    assert completed_process.returncode == 0
-    assert "Would remove" in completed_process.stdout

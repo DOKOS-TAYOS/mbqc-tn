@@ -41,6 +41,22 @@ jobs:
         run: .\.venv\Scripts\python.exe -m pip install -e .[dev]
         if: runner.os == 'Windows'
 
+      - name: Package import smoke
+        run: ./.venv/bin/python -c "import graphix_lab; print(graphix_lab.__all__)"
+        if: runner.os != 'Windows'
+
+      - name: Package import smoke on Windows
+        run: .\.venv\Scripts\python.exe -c "import graphix_lab; print(graphix_lab.__all__)"
+        if: runner.os == 'Windows'
+
+      - name: CLI help smoke
+        run: ./.venv/bin/python -m graphix_lab.cli --help
+        if: runner.os != 'Windows'
+
+      - name: CLI help smoke on Windows
+        run: .\.venv\Scripts\python.exe -m graphix_lab.cli --help
+        if: runner.os == 'Windows'
+
       - name: Ruff check
         run: ./.venv/bin/python -m ruff check .
         if: runner.os != 'Windows'
@@ -72,3 +88,27 @@ jobs:
       - name: Pyright on Windows
         run: .\.venv\Scripts\python.exe -m pyright
         if: runner.os == 'Windows'
+
+  qiskit-optional:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Create virtual environment
+        run: python -m venv .venv
+
+      - name: Upgrade pip
+        run: ./.venv/bin/python -m pip install --upgrade pip
+
+      - name: Install project with optional Qiskit extra
+        run: ./.venv/bin/python -m pip install -e .[qiskit,dev]
+
+      - name: Optional Qiskit pytest subset
+        run: ./.venv/bin/python -m pytest tests/unit/test_qiskit_adapter.py tests/smoke/test_examples.py -k qiskit

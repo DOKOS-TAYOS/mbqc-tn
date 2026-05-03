@@ -11,7 +11,7 @@ from .errors import (
 )
 from .simulation import BackendComparisonReport, BackendRunReport, SimulationReport
 from .summaries import PatternSummary, ResourceSummary
-from .traces import RunTrace, TraceFrame
+from .traces import RunTrace, TraceAnimationHandle, TraceFrame
 
 __all__ = [
     "BackendComparisonReport",
@@ -25,6 +25,7 @@ __all__ = [
     "ResourceSummary",
     "RunTrace",
     "SimulationReport",
+    "TraceAnimationHandle",
     "TraceFrame",
     "UnsupportedBackendError",
     "UnsupportedGateError",

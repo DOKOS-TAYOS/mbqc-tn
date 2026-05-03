@@ -17,7 +17,25 @@ def _build_module_command(module_name: str, *args: str) -> list[str]:
     return [sys.executable, "-m", module_name, *args]
 
 
-def build_quality_commands(include_format_fix: bool = True) -> list[list[str]]:
+def build_import_smoke_command(package_name: str) -> list[str]:
+    return [
+        sys.executable,
+        "-c",
+        f"import {package_name}; print({package_name}.__all__)",
+    ]
+
+
+def build_cli_help_command(package_name: str) -> list[str]:
+    return [
+        sys.executable,
+        "-m",
+        f"{package_name}.cli",
+        "--help",
+    ]
+
+
+def build_quality_commands(project_root: Path, include_format_fix: bool = True) -> list[list[str]]:
+    package_name = load_package_name(project_root)
     commands: list[list[str]] = [_build_module_command("ruff", "check", ".")]
     if include_format_fix:
         commands[0].append("--fix")
@@ -26,6 +44,8 @@ def build_quality_commands(include_format_fix: bool = True) -> list[list[str]]:
         commands.append(_build_module_command("ruff", "format", ".", "--check"))
     commands.extend(
         [
+            build_import_smoke_command(package_name),
+            build_cli_help_command(package_name),
             _build_module_command("pytest"),
             _build_module_command("pyright"),
         ]
@@ -51,6 +71,20 @@ def build_bootstrap_resync_command() -> list[str]:
 def load_distribution_name(project_root: Path) -> str:
     pyproject_data = tomllib.loads((project_root / "pyproject.toml").read_text(encoding="utf-8"))
     return str(pyproject_data["project"]["name"])
+
+
+def load_package_name(project_root: Path) -> str:
+    pyproject_path = project_root / "pyproject.toml"
+    if not pyproject_path.exists():
+        return "graphix_lab"
+
+    pyproject_data = tomllib.loads(pyproject_path.read_text(encoding="utf-8"))
+    tool_data = pyproject_data.get("tool", {})
+    template_data = tool_data.get("vibe_template", {})
+    package_name = template_data.get("package_name")
+    if isinstance(package_name, str) and package_name.strip():
+        return package_name
+    return "graphix_lab"
 
 
 def build_license_command(output_file: Path, distribution_name: str) -> list[str]:

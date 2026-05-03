@@ -1,46 +1,93 @@
 # Graphix Lab
 
-Graphix Lab is a small educational usability layer over Graphix for measurement-based quantum computing experiments. It aims to wrap Graphix circuits and patterns with readable summaries, command introspection, simulation reports, conceptual traces, and Matplotlib/NetworkX visualizations.
-
-Graphix Lab does not replace Graphix. It delegates MBQC transpilation, pattern manipulation, flow and gflow logic, and simulation backends to Graphix while this repository focuses on usability, diagnostics, and teaching-friendly APIs.
-
-## Intended MVP Flow
-
-The planned user-facing workflow for the MVP looks like this:
-
-```python
-from graphix_lab import circuit
-
-lab = (
-    circuit(2)
-    .h(0)
-    .cnot(0, 1)
-    .compile()
-    .standardize()
-    .shift_signals()
-)
-
-print(lab.summary())
-fig = lab.draw()
-report = lab.run(backend="statevector", seed=123, trace=True)
-```
-
-## Working In This Repository
-
-This repository has already been bootstrapped as Graphix Lab. Do not rerun `bootstrap` here.
-
-1. Create and activate `.venv`.
-2. Install in editable mode with dev tools: `python -m pip install -e .[dev]`
-3. Run `bin\quality.cmd` on Windows or `./bin/quality.sh` on Linux/macOS.
-4. After installing or changing runtime dependencies, regenerate `THIRD_PARTY_LICENSES` with `python scripts/run_template_command.py licenses`.
-
-If you change `pyproject.toml`, rerun `python -m pip install -e .[dev]` inside `.venv` before trusting runtime features or the quality checks. That keeps Graphix Lab, Graphix itself, and the dev tools aligned with the declared project dependencies.
-
-The wrappers in `bin/` stay useful because they prefer the local `.venv` interpreter and keep the quality flow consistent across Windows and Linux/macOS.
+Graphix Lab is a small educational usability layer over Graphix for
+measurement-based quantum computing experiments. It keeps Graphix in charge of
+transpilation, pattern manipulation, and simulation, while adding readable
+summaries, conceptual traces, backend comparisons, and Matplotlib-based
+inspection tools.
 
 ## Project Scope
 
 `A small, educational usability layer over Graphix for measurement-based quantum computing experiments. The project wraps Graphix patterns and circuits with clearer summaries, command introspection, simulation reports, Matplotlib/NetworkX visualizations, step traces, and optional Qiskit import helpers without reimplementing Graphix core backends.`
+
+## Install
+
+This repository is already bootstrapped as Graphix Lab. Do not rerun
+`bootstrap` here.
+
+Windows PowerShell:
+
+```powershell
+python -m venv .venv
+.venv\Scripts\Activate.ps1
+python -m pip install --upgrade pip
+python -m pip install -e .[dev]
+```
+
+Linux or macOS:
+
+```bash
+python -m venv .venv
+source .venv/bin/activate
+python -m pip install --upgrade pip
+python -m pip install -e .[dev]
+```
+
+If you also want the optional Qiskit import example, install:
+
+```bash
+python -m pip install -e .[qiskit,dev]
+```
+
+After changing runtime dependencies in `pyproject.toml`, rerun the editable
+install inside `.venv` before trusting runtime behavior or quality results.
+When dependency changes affect third-party packages, regenerate
+`THIRD_PARTY_LICENSES` with `python scripts/run_template_command.py licenses`.
+
+## Minimal Example
+
+```python
+from graphix_lab import circuit
+
+pattern = circuit(2).h(0).cnot(0, 1).compile().standardize()
+
+print(pattern.summary())
+print(pattern.explain())
+
+report = pattern.compare_backends(backends=("statevector",))
+print(report)
+```
+
+## Example Scripts
+
+- `examples/one_qubit_rotation.py` shows a tiny rotation workflow and prints
+  the resulting summary.
+- `examples/bell_like_pattern.py` builds a Bell-like circuit, compiles it, and
+  prints a small resource overview.
+- `examples/trace_slider.py` creates the Matplotlib slider-based trace view
+  without requiring a notebook.
+- `examples/trace_animation.py` prepares the same trace-inspection handle and
+  prints the final frame title for quick terminal verification.
+- `examples/backend_comparison.py` runs the same pattern through detected
+  Graphix backends and prints the typed comparison report.
+- `examples/qiskit_import.py` demonstrates optional Qiskit import and degrades
+  gracefully when `qiskit` is not installed.
+- `examples/library_usage.py` shows the frozen public data models without
+  requiring a Graphix runtime call.
+- `examples/cli_usage.py` demonstrates the thin CLI entrypoint through a safe
+  `clean --dry-run` invocation.
+
+## Working In This Repository
+
+1. Create or activate `.venv`.
+2. Install with `python -m pip install -e .[dev]` if the environment is not
+   ready yet.
+3. Run `bin\quality.cmd` on Windows or `./bin/quality.sh` on Linux/macOS.
+4. Update `CHANGELOG.md` and `docs/docs_for_ai/status.md` when the public
+   behavior or workflow changes.
+
+The wrappers in `bin/` stay useful because they prefer the local `.venv`
+interpreter and keep the quality flow consistent across Windows and Linux/macOS.
 
 ## Project Documentation
 
