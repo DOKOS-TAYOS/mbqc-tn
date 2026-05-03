@@ -25,6 +25,9 @@ from .app.tooling_service import (
     run_commands,
 )
 
+# Keep the host path implementation stable even if tests monkeypatch os.name.
+_RUNTIME_PATH_CLS = type(Path())
+
 
 def main(argv: str | Sequence[str] | None = None) -> int:
     parser = _build_parser()
@@ -105,8 +108,16 @@ def _strip_wrapping_quotes(token: str) -> str:
     return token
 
 
+def _current_working_directory() -> Path:
+    return _RUNTIME_PATH_CLS.cwd()
+
+
+def _path_from_cli_value(path_value: str) -> Path:
+    return _RUNTIME_PATH_CLS(path_value)
+
+
 def _handle_bootstrap(args: argparse.Namespace) -> int:
-    project_root = Path.cwd()
+    project_root = _current_working_directory()
     if not bootstrap_required_for_workspace(project_root):
         print(BOOTSTRAP_ALREADY_COMPLETED_MESSAGE)
         return 1
@@ -150,7 +161,7 @@ def _handle_bootstrap(args: argparse.Namespace) -> int:
 
 
 def _handle_quality(args: argparse.Namespace) -> int:
-    project_root = Path.cwd()
+    project_root = _current_working_directory()
     commands = build_quality_commands(
         project_root=project_root,
         include_format_fix=not args.check_only,
@@ -165,29 +176,34 @@ def _handle_quality(args: argparse.Namespace) -> int:
 
 def _handle_test(args: argparse.Namespace) -> int:
     del args
-    completed_process = subprocess.run(build_test_command(), check=False, cwd=Path.cwd())
+    completed_process = subprocess.run(
+        build_test_command(),
+        check=False,
+        cwd=_current_working_directory(),
+    )
     return completed_process.returncode
 
 
 def _handle_clean(args: argparse.Namespace) -> int:
-    result = run_clean(root=Path.cwd(), dry_run=args.dry_run)
+    current_working_directory = _current_working_directory()
+    result = run_clean(root=current_working_directory, dry_run=args.dry_run)
     action_text = "Would remove" if args.dry_run else "Removed"
     print(f"{action_text} {len(result.planned_paths)} path(s).")
     for path in result.planned_paths:
-        print(f"- {path.relative_to(Path.cwd())}")
+        print(f"- {path.relative_to(current_working_directory)}")
     if result.failed_paths:
         print("Failed to remove:")
         for path in result.failed_paths:
-            print(f"- {path.relative_to(Path.cwd())}")
+            print(f"- {path.relative_to(current_working_directory)}")
         return 1
     return 0
 
 
 def _handle_licenses(args: argparse.Namespace) -> int:
-    project_root = Path.cwd()
+    project_root = _current_working_directory()
     distribution_name = load_distribution_name(project_root)
     completed_process = subprocess.run(
-        build_license_command(Path(args.output), distribution_name),
+        build_license_command(_path_from_cli_value(args.output), distribution_name),
         check=False,
         cwd=project_root,
     )

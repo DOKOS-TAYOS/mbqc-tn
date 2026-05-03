@@ -51,6 +51,7 @@ All notable changes to this project are documented in this file.
 
 ### Fixed
 
+- `graphix_lab.cli` now keeps using the host platform's real concrete `pathlib` class for working-directory and output-path handling, so tests can simulate Windows-style programmatic CLI strings on Linux without crashing inside `Path.cwd()` or `Path(...)`.
 - The shared `temp_dir` test fixture no longer depends on `pytest`'s own temporary-directory factory; it now probes the system temp root first and falls back to a repo-local `pytest-temp/` workspace only when the full create/write/delete cycle is not usable in the active environment.
 - Bootstrap integration tests now ignore unreadable local artifact directories while copying the repository into a temporary workspace, which keeps unrelated local probes from breaking the bootstrap regression suite.
 - `LabPattern.shift_signals()` now keeps the wrapped Graphix pattern bound to the real pattern object when Graphix mutates in place but returns its auxiliary signal-map `dict`, instead of accidentally replacing the wrapper target with that dictionary and losing command introspection.
