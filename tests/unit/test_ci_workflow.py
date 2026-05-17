@@ -18,6 +18,16 @@ def test_ci_workflow_uses_read_only_repository_permissions() -> None:
     assert "\npermissions:\n  contents: read\n" in workflow_content
 
 
+def test_ci_workflow_uses_current_first_party_action_versions() -> None:
+    repo_root = Path(__file__).resolve().parents[2]
+    workflow_content = (repo_root / ".github" / "workflows" / "ci.yml").read_text(encoding="utf-8")
+
+    assert "actions/checkout@v6" in workflow_content
+    assert "actions/setup-python@v6" in workflow_content
+    assert "actions/checkout@v4" not in workflow_content
+    assert "actions/setup-python@v5" not in workflow_content
+
+
 def test_ci_workflow_runs_editable_install_and_release_smoke_checks() -> None:
     repo_root = Path(__file__).resolve().parents[2]
     workflow_content = (repo_root / ".github" / "workflows" / "ci.yml").read_text(encoding="utf-8")
