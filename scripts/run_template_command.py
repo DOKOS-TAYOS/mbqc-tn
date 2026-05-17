@@ -41,7 +41,7 @@ def build_command(project_root: Path, args: Sequence[str]) -> list[str]:
 def main(argv: Sequence[str] | None = None) -> int:
     project_root = Path(__file__).resolve().parents[1]
     command = build_command(project_root, list(argv) if argv is not None else sys.argv[1:])
-    completed_process = subprocess.run(command, check=False, cwd=project_root)
+    completed_process = subprocess.run(command, check=False, cwd=project_root)  # noqa: S603
     return completed_process.returncode
 
 

@@ -22,7 +22,7 @@ def _example_env() -> dict[str, str]:
 def _run_example(example_name: str) -> subprocess.CompletedProcess[str]:
     repo_root = Path(__file__).resolve().parents[2]
     example_path = repo_root / "examples" / example_name
-    return subprocess.run(
+    return subprocess.run(  # noqa: S603
         [sys.executable, str(example_path)],
         check=False,
         capture_output=True,

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import logging
 import warnings
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
@@ -29,6 +30,7 @@ _NODE_FILL_OUTPUT = "#69B3A2"
 _NODE_FILL_MEASURED = "#F4A261"
 _NODE_FILL_INPUT_OUTPUT = "#8EC8B6"
 _ANIMATION_TEXT_BACKGROUND = "#F7F3E9"
+_LOGGER = logging.getLogger(__name__)
 
 
 @dataclass(frozen=True, slots=True)
@@ -453,6 +455,7 @@ def _extract_flow_dependencies(pattern: object) -> tuple[tuple[int, int], ...]:
         try:
             flow = extract_flow()
         except Exception:
+            _LOGGER.debug("Skipping unusable %s flow extraction.", method_name, exc_info=True)
             continue
         correction_function = getattr(flow, "correction_function", None)
         if not isinstance(correction_function, Mapping):

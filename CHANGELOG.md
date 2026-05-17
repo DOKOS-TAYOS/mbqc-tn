@@ -6,6 +6,9 @@ All notable changes to this project are documented in this file.
 
 ### Added
 
+- Dependabot configuration now monitors Python dependencies from `pyproject.toml` and GitHub Actions weekly, grouping Python runtime and development updates separately.
+- A `graphix-lab security` CLI command now runs `pip-audit --skip-editable`, and CI includes a dedicated dependency vulnerability audit job.
+- Ruff security rules are now part of the default lint configuration, with pytest assertions ignored only under `tests/`.
 - Script examples for the current Graphix Lab workflows: `examples/one_qubit_rotation.py`, `examples/bell_like_pattern.py`, `examples/trace_slider.py`, `examples/backend_comparison.py`, and `examples/qiskit_import.py`.
 - Smoke coverage for the new example set, including the optional-Qiskit example's friendly missing-dependency path.
 - `from_qiskit(...)` now imports a small supported Qiskit gate subset into a live `LabCircuit`, keeping `qiskit` optional while raising a clear `OptionalDependencyError` when that extra is missing from the active `.venv`.
@@ -51,6 +54,8 @@ All notable changes to this project are documented in this file.
 
 ### Fixed
 
+- The CI workflow now grants the default `GITHUB_TOKEN` read-only repository content permissions unless a future job explicitly needs more.
+- Flow extraction fallback in visualization now logs skipped incompatible Graphix flow helpers at debug level instead of silently swallowing every exception.
 - `python -m graphix_lab.cli licenses` now ignores any repo-local editable distribution aliases that still point at this checkout, so stale installs such as `project-name` no longer leak into `THIRD_PARTY_LICENSES`.
 - The CLI help text, release-packaging notes, troubleshooting guide, and root documentation index now describe Graphix Lab explicitly and explain the third-party license inventory workflow more clearly.
 - `graphix_lab.cli` now exposes a local Windows-argument-splitting seam for tests instead of forcing them to monkeypatch the global `os.name`, and it keeps using the host platform's real concrete `pathlib` class for working-directory and output-path handling so Ubuntu `pytest` runs no longer crash while simulating Windows-style programmatic CLI strings.

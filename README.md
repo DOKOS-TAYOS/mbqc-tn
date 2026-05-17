@@ -83,7 +83,9 @@ print(report)
 2. Install with `python -m pip install -e .[dev]` if the environment is not
    ready yet.
 3. Run `bin\quality.cmd` on Windows or `./bin/quality.sh` on Linux/macOS.
-4. Update `CHANGELOG.md` and `docs/docs_for_ai/status.md` when the public
+4. Run `python scripts/run_template_command.py security` when dependency or
+   release tooling changes and network access is available.
+5. Update `CHANGELOG.md` and `docs/docs_for_ai/status.md` when the public
    behavior or workflow changes.
 
 The wrappers in `bin/` stay useful because they prefer the local `.venv`

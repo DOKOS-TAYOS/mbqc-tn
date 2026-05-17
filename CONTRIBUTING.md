@@ -13,6 +13,8 @@ Thanks for contributing.
    - `ruff format .`
    - `pytest`
    - `pyright`
+   - `python scripts/run_template_command.py security` when network access is
+     available
 
 ## Development Environment
 
@@ -26,3 +28,4 @@ Thanks for contributing.
 - docs updated where needed
 - AI docs updated if workflow, architecture, or conventions changed
 - license inventory refreshed if dependencies changed
+- dependency audit passes when dependencies or release tooling changed

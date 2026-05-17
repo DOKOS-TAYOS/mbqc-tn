@@ -47,7 +47,9 @@ dependencies = [
 qiskit = ["qiskit>=2,<3"]
 examples = ["jupyter>=1.1"]
 dev = [
+    "pip-audit>=2.10.0",
     "pip-licenses>=5.0.0",
+    "pip-system-certs>=5.3; platform_system == 'Windows'",
     "pyright>=1.1.408",
     "pytest>=8.4.2",
     "ruff>=0.11.11",
@@ -98,8 +100,11 @@ line-ending = "lf"
 quote-style = "double"
 
 [tool.ruff.lint]
-select = ["ANN", "ARG", "B", "C4", "E", "F", "I", "N", "RUF", "SIM", "UP"]
+select = ["ANN", "ARG", "B", "C4", "E", "F", "I", "N", "RUF", "S", "SIM", "UP"]
 ignore = ["ANN401"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**/*.py" = ["S101"]
 
 [tool.pyright]
 include = ["src", "tests", "examples", "scripts"]

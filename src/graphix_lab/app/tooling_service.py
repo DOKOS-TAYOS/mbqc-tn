@@ -62,6 +62,10 @@ def build_test_command() -> list[str]:
     return _build_module_command("pytest")
 
 
+def build_security_audit_command() -> list[str]:
+    return _build_module_command("pip_audit", "--skip-editable")
+
+
 def build_bootstrap_resync_command() -> list[str]:
     return [
         sys.executable,
@@ -186,7 +190,7 @@ def build_license_command(
 def run_commands(commands: list[list[str]], root: Path) -> list[CommandExecutionResult]:
     results: list[CommandExecutionResult] = []
     for command in commands:
-        completed_process = subprocess.run(command, check=False, cwd=root)
+        completed_process = subprocess.run(command, check=False, cwd=root)  # noqa: S603
         results.append(
             CommandExecutionResult(
                 command=tuple(command),

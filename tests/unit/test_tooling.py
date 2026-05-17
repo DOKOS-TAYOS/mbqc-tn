@@ -144,6 +144,12 @@ def test_test_command_uses_active_interpreter() -> None:
     assert command == [sys.executable, "-m", "pytest"]
 
 
+def test_security_audit_command_skips_editable_local_package() -> None:
+    command = tooling_service.build_security_audit_command()
+
+    assert command == [sys.executable, "-m", "pip_audit", "--skip-editable"]
+
+
 def test_bootstrap_resync_command_uses_active_interpreter() -> None:
     command = build_bootstrap_resync_command()
 
@@ -181,6 +187,15 @@ def test_pyproject_disables_cacheprovider_for_portable_pytest_runs() -> None:
     pyproject_data = tomllib.loads((repo_root / "pyproject.toml").read_text(encoding="utf-8"))
 
     assert "-p no:cacheprovider" in pyproject_data["tool"]["pytest"]["ini_options"]["addopts"]
+
+
+def test_ruff_config_enables_security_rules_without_flagging_pytest_asserts() -> None:
+    repo_root = Path(__file__).resolve().parents[2]
+    pyproject_data = tomllib.loads((repo_root / "pyproject.toml").read_text(encoding="utf-8"))
+    ruff_lint_data = pyproject_data["tool"]["ruff"]["lint"]
+
+    assert "S" in ruff_lint_data["select"]
+    assert "S101" in ruff_lint_data["per-file-ignores"]["tests/**/*.py"]
 
 
 def test_run_commands_uses_subprocess_with_workspace_root(

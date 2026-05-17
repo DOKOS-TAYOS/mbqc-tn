@@ -24,7 +24,9 @@ Optional extras:
 qiskit = ["qiskit>=2,<3"]
 examples = ["jupyter>=1.1"]
 dev = [
+  "pip-audit>=2.10.0",
   "pip-licenses>=5.0.0",
+  "pip-system-certs>=5.3; platform_system == 'Windows'",
   "pyright>=1.1.408",
   "pytest>=8.4.2",
   "ruff>=0.11.11",
@@ -72,6 +74,23 @@ dependency does not publish license metadata in its distribution, the table may
 still show `UNKNOWN` even when the upstream project documents its license
 elsewhere.
 
+## Dependency security
+
+Dependabot is configured in `.github/dependabot.yml` for both Python
+dependencies and GitHub Actions. Python updates are grouped into runtime and
+development dependency pull requests so routine maintenance stays readable.
+
+Run the local dependency audit from an activated `.venv` after installing the
+development extra:
+
+```powershell
+python scripts/run_template_command.py security
+```
+
+The command delegates to `pip-audit --skip-editable`, which audits installed
+third-party packages while skipping the local editable `graphix-lab` checkout
+until the project exists on PyPI.
+
 ## Release smoke checks
 
 Before tagging or publishing, confirm the editable install, package import, and
@@ -92,6 +111,16 @@ CI.
 - Keep both `windows-latest` and `ubuntu-latest` in the main test matrix.
 - Keep optional Qiskit coverage isolated in its own job so the core matrix can
   still pass without the extra installed.
+- Keep the dependency audit job green before release.
+- Keep workflow permissions read-only unless a specific release job needs a
+  narrower elevated permission.
+
+## PyPI publishing
+
+When publishing is added, use a dedicated release workflow with PyPI Trusted
+Publishing and a protected GitHub environment such as `pypi`. The release job
+should request `id-token: write` only for publishing and should avoid long lived
+PyPI API tokens.
 
 ## Do not publish until
 
@@ -101,3 +130,4 @@ CI.
 - `THIRD_PARTY_LICENSES` is regenerated
 - `CHANGELOG.md` is updated
 - package import and CLI smoke tests pass
+- dependency vulnerability audit passes

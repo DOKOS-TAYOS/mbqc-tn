@@ -1,11 +1,11 @@
 # Status
 
-- Phase: Prompt 16 implemented for review hardening
-- Last update: the Prompt 16 review found and fixed a real Graphix compatibility bug where `Pattern.shift_signals()` mutates the pattern in place but returns an auxiliary signal-map `dict`; `LabPattern.shift_signals()` now keeps the wrapper bound to the mutated Graphix pattern instead of replacing it with that dictionary, example smoke coverage now includes the extra `trace_animation`, `library_usage`, and `cli_usage` scripts, and the public docs now describe the real `shift_signals()` behavior
-- Next step: No later Codex-pack prompt remains after Prompt 16; move to manual MVP acceptance/release preparation, or write a new follow-up prompt only if you want post-MVP Graphix compatibility or UX refinements
+- Phase: Security and release-preparation hardening
+- Last update: Dependabot configuration now tracks Python dependencies and GitHub Actions, CI uses read-only repository permissions by default, CI runs a `pip-audit` dependency vulnerability job, and the local CLI exposes `python scripts/run_template_command.py security` for manual audits from `.venv`
+- Next step: Continue manual MVP acceptance/release preparation; before PyPI publishing, add a dedicated release workflow using PyPI Trusted Publishing and a protected GitHub environment
 - Blockers: No blocker for the core MVP flow; the optional `qiskit` extra is still not installed in the active local `.venv`, so the real-Qiskit tests continue to skip locally and are expected to run through the isolated CI job instead
-- Tests added: `tests/unit/test_lab_pattern.py` now covers the real `shift_signals()` auxiliary-return shape, `tests/integration/test_graphix_runtime_integration.py` now verifies that real Graphix keeps command introspection after `shift_signals()`, and `tests/smoke/test_examples.py` now covers `examples/trace_animation.py`, `examples/library_usage.py`, and `examples/cli_usage.py`
-- Quality command result: On May 3, 2026, `bin\quality.cmd` again hit the known sandbox-only Windows temp-directory permission boundary during `pytest`, then passed cleanly outside the sandbox with `ruff check . --fix`, `ruff format .`, package-import smoke, CLI-help smoke, `pytest`, and `pyright`; the final outside-sandbox result was `100 passed`, `2 skipped` (missing optional Qiskit), and `0 pyright errors`
+- Tests added: `tests/unit/test_dependabot_config.py` covers Dependabot configuration, `tests/unit/test_ci_workflow.py` covers CI permission and dependency-audit expectations, and `tests/unit/test_tooling.py` covers the local security audit command plus Ruff security configuration
+- Quality command result: On May 17, 2026, security hardening passed `ruff check . --fix`, `ruff format .`, `pytest` (`162 passed`, `2 skipped` for missing optional Qiskit), `pyright` (`0 errors`), and `python scripts/run_template_command.py security` (`No known vulnerabilities found`)
 - License: MIT
 
 ## Checklist
@@ -42,3 +42,6 @@
 - [x] The extra example scripts now have smoke coverage and are listed in the user/AI guides
 - [x] The README and Graphix Lab docs now describe the live API and current repository workflow
 - [x] `THIRD_PARTY_LICENSES` regenerated after installing Graphix Lab runtime dependencies
+- [x] Dependabot tracks Python dependencies and GitHub Actions
+- [x] CI runs a dependency vulnerability audit with `pip-audit`
+- [x] CI defaults `GITHUB_TOKEN` to read-only repository contents

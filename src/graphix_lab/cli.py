@@ -20,6 +20,7 @@ from .app.tooling_service import (
     build_bootstrap_resync_command,
     build_license_command,
     build_quality_commands,
+    build_security_audit_command,
     build_test_command,
     load_distribution_name,
     run_commands,
@@ -39,6 +40,8 @@ def main(argv: str | Sequence[str] | None = None) -> int:
         return _handle_quality(args)
     if args.command == "test":
         return _handle_test(args)
+    if args.command == "security":
+        return _handle_security(args)
     if args.command == "clean":
         return _handle_clean(args)
     if args.command == "licenses":
@@ -75,6 +78,10 @@ def _build_parser() -> argparse.ArgumentParser:
     quality_parser.add_argument("--check-only", action="store_true")
 
     subparsers.add_parser("test", help="Run pytest.")
+    subparsers.add_parser(
+        "security",
+        help="Run a dependency vulnerability audit with pip-audit.",
+    )
 
     clean_parser = subparsers.add_parser(
         "clean",
@@ -157,7 +164,7 @@ def _handle_bootstrap(args: argparse.Namespace) -> int:
     resync_command = build_bootstrap_resync_command()
     print("Resyncing editable install:")
     print(f"- {' '.join(resync_command)}")
-    completed_process = subprocess.run(resync_command, check=False, cwd=project_root)
+    completed_process = subprocess.run(resync_command, check=False, cwd=project_root)  # noqa: S603
     if completed_process.returncode != 0:
         print("Automatic resync failed. Run this command manually:")
         print(f"- {' '.join(resync_command)}")
@@ -182,8 +189,18 @@ def _handle_quality(args: argparse.Namespace) -> int:
 
 def _handle_test(args: argparse.Namespace) -> int:
     del args
-    completed_process = subprocess.run(
+    completed_process = subprocess.run(  # noqa: S603
         build_test_command(),
+        check=False,
+        cwd=_current_working_directory(),
+    )
+    return completed_process.returncode
+
+
+def _handle_security(args: argparse.Namespace) -> int:
+    del args
+    completed_process = subprocess.run(  # noqa: S603
+        build_security_audit_command(),
         check=False,
         cwd=_current_working_directory(),
     )
@@ -208,7 +225,7 @@ def _handle_clean(args: argparse.Namespace) -> int:
 def _handle_licenses(args: argparse.Namespace) -> int:
     project_root = _current_working_directory()
     distribution_name = load_distribution_name(project_root)
-    completed_process = subprocess.run(
+    completed_process = subprocess.run(  # noqa: S603
         build_license_command(
             output_file=_path_from_cli_value(args.output),
             project_root=project_root,
