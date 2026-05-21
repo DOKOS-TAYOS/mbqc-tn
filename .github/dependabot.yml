@@ -18,6 +18,11 @@ updates:
         dependency-type: "development"
         patterns:
           - "*"
+    ignore:
+      - dependency-name: "*"
+        update-types:
+          - "version-update:semver-patch"
+          - "version-update:semver-minor"
 
   - package-ecosystem: "github-actions"
     directory: "/"
@@ -27,3 +32,8 @@ updates:
       time: "08:30"
       timezone: "Europe/Madrid"
     open-pull-requests-limit: 5
+    ignore:
+      - dependency-name: "*"
+        update-types:
+          - "version-update:semver-patch"
+          - "version-update:semver-minor"
