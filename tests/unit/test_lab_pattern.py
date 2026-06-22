@@ -901,6 +901,8 @@ def test_lab_pattern_draw_returns_headless_matplotlib_figure() -> None:
         show_corrections=False,
         layout="shell",
     )
+    figure.canvas.draw()
+    figure_without_corrections.canvas.draw()
 
     assert isinstance(figure, Figure)
     assert len(figure.axes) == 1

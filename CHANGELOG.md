@@ -54,8 +54,9 @@ All notable changes to this project are documented in this file.
 
 ### Fixed
 
-- CI now uses `actions/checkout@v6` and `actions/setup-python@v6` so Dependabot's GitHub Actions update is applied across all jobs.
+- CI now uses `actions/checkout@v7` and `actions/setup-python@v6` so Dependabot's GitHub Actions update is applied across all jobs.
 - The CI workflow now grants the default `GITHUB_TOKEN` read-only repository content permissions unless a future job explicitly needs more.
+- Visualization correction labels now render robustly for nearly flat layouts such as the two-node `shell` case, so Matplotlib no longer crashes while drawing animated or static MBQC graphs on Windows.
 - Flow extraction fallback in visualization now logs skipped incompatible Graphix flow helpers at debug level instead of silently swallowing every exception.
 - `python -m graphix_lab.cli licenses` now ignores any repo-local editable distribution aliases that still point at this checkout, so stale installs such as `project-name` no longer leak into `THIRD_PARTY_LICENSES`.
 - The CLI help text, release-packaging notes, troubleshooting guide, and root documentation index now describe Graphix Lab explicitly and explain the third-party license inventory workflow more clearly.

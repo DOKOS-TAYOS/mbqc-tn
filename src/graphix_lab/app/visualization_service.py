@@ -636,10 +636,11 @@ def _draw_dependency(
 
     midpoint_x = (source_position[0] + target_position[0]) / 2
     midpoint_y = (source_position[1] + target_position[1]) / 2
-    axes.text(
-        midpoint_x,
-        midpoint_y + (0.06 if edge_radius >= 0 else -0.06),
+    axes.annotate(
         label,
+        xy=(midpoint_x, midpoint_y),
+        xytext=(0, 6 if edge_radius >= 0 else -6),
+        textcoords="offset points",
         color=edge_color,
         fontsize=9,
         fontweight="bold",
